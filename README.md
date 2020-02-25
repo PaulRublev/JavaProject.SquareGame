@@ -1,4 +1,5 @@
 # JavaProject.SquareGame
+![image alt](https://github.com/PaulRublev/JavaProject.SquareGame/raw/master/readmeRes/sqrGame.png)
 
 Для управления используйте клавиатуру:
   - движение влево  ![image alt](https://github.com/PaulRublev/JavaProject.SquareGame/raw/master/readmeRes/keyboard-button_leftArrow.png)
