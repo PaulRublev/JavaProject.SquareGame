@@ -16,9 +16,9 @@ class Target extends JButton {
 	int armor;
 	boolean toLeft = false;
 	
-	Target(int arm) {
+	Target(int armor) {
 		super();
-		armor = arm;
+		this.armor = armor;
 	}
 	
 	public void getDamage() {
