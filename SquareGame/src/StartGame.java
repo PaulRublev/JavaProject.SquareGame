@@ -1,7 +1,6 @@
 
 import java.awt.Color;
 import java.awt.event.*;
-
 import javax.swing.*;
 
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
@@ -10,7 +9,8 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	public int borderWidth;
 	JLabel destroyer;
 	JButton target;
-	Timer tick, tack;
+	Timer tick;
+	Timer tack;
 	final public static String iconPath = "icon/";
 	ImageIcon defaultImage = new ImageIcon(getClass().getResource(
 			iconPath + "hold.png"));
@@ -20,7 +20,9 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			iconPath + "toRight.png"));
 	ImageIcon reloadImage = new ImageIcon(getClass().getResource(
 			iconPath + "reload.png"));
-	int reloadSch, mul = 1, sch = 0;
+	int reloadSch;
+	int mul = 1;
+	int sch = 0;
 	public boolean toLeft = false;
 	
 	GameFieldFrame(int j, int k) {
@@ -133,7 +135,10 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 			GameFieldFrame.iconPath + "bullet.png"));
 	GameFieldFrame frame;
 	Timer flyTimer;
-	int f, i, y, p = 0;
+	int f;
+	int i;
+	int y;
+	int p = 0;
 	
 	Bullet(GameFieldFrame frame) {
 		this.frame = frame;
