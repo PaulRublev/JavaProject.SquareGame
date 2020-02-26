@@ -12,12 +12,18 @@ class Cannon extends JLabel {
 	}
 }
 
+class Target extends JButton {
+	Target() {
+		super();
+	}
+}
+
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
 	final static int FlyBulletTime = 4600;
 	public int borderWidth;
-	Cannon destroyer;
-	JButton target;
+	Cannon cannon;
+	Target target;
 	Timer tick;
 	Timer tack;
 	final public static String iconPath = "icon/";
@@ -34,8 +40,8 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	int sch = 0;
 	public boolean toLeft = false;
 	
-	GameFieldFrame(int j, int k) {
-		setBounds(j, k, 350, 450);
+	GameFieldFrame(int x, int y) {
+		setBounds(x, y, 350, 450);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
@@ -47,7 +53,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		addKeyListener(this);
 		
 		borderWidth = 4;
-		target = new JButton();
+		target = new Target();
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
 		target.setBorder(BorderFactory.createMatteBorder(0, borderWidth, borderWidth, borderWidth, Color.black));
 		target.setFocusable(false);
@@ -56,49 +62,49 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		add(target);
 		tack.start();
 		
-		destroyer = new Cannon(defaultImage);
-		destroyer.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
-		add(destroyer);
+		cannon = new Cannon(defaultImage);
+		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
+		add(cannon);
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		destroyer.setIcon(defaultImage);
+		cannon.setIcon(defaultImage);
 		mul = 1;
 		sch = 0;
 	}
 	public void keyPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			destroyer.setIcon(toLeftImage);
-			if (destroyer.getX() > 0) {
-				destroyer.setLocation((destroyer.getX() - 1 * mul), destroyer.getY());
+			cannon.setIcon(toLeftImage);
+			if (cannon.getX() > 0) {
+				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
 				sch++;
 				if (sch == 25) 
 					mul = 2;
 				else if (sch == 70) 
 					mul = 4;
 			} else {
-				destroyer.setLocation(0, destroyer.getY());
+				cannon.setLocation(0, cannon.getY());
 			}
 			break;
 		case 39:
-			destroyer.setIcon(toRightImage);
-			if (destroyer.getX() < getWidth() - 17 - 64) {
-				destroyer.setLocation((destroyer.getX() + 1 * mul), destroyer.getY());
+			cannon.setIcon(toRightImage);
+			if (cannon.getX() < getWidth() - 17 - 64) {
+				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
 				sch++;
 				if (sch == 25) 
 					mul = 2;
 				else if (sch == 70) 
 					mul = 4;
 			} else {
-				destroyer.setLocation(getWidth() - 17 - 64, destroyer.getY());
+				cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
 			}
 			break;
 		case 32:
 			removeKeyListener(this);
 			mul = 1;
 			sch = 0;
-			destroyer.setIcon(reloadImage);
+			cannon.setIcon(reloadImage);
 			new Bullet(this);
 			repaint();
 			reloadSch = ReloadTime;
@@ -114,7 +120,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			if (reloadSch > 1) {
 				reloadSch--;
 			} else {
-				destroyer.setIcon(defaultImage);
+				cannon.setIcon(defaultImage);
 				addKeyListener(this);
 				tick.stop();
 			}
@@ -151,7 +157,7 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 	
 	Bullet(GameFieldFrame frame) {
 		this.frame = frame;
-		setBounds(frame.destroyer.getX(), frame.getHeight() - 64 - 105, 64, 64);
+		setBounds(frame.cannon.getX(), frame.getHeight() - 64 - 105, 64, 64);
 		setIcon(bulImage);
 		frame.addKeyListener(this);
 		frame.add(this);
