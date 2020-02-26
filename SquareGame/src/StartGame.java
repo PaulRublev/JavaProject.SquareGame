@@ -222,6 +222,12 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 public class StartGame {
 
 	public static void main(String[] args) {
+		
+		setLook();
+		new FrameField(300, 300);
+	}
+	
+	static void setLook() {
 		try {
 			// Set System L&F
 			UIManager.setLookAndFeel(
@@ -236,8 +242,6 @@ public class StartGame {
 		} catch (IllegalAccessException e) {
 			// handle exception
 		}
-
-		new FrameField(300, 300);
 	}
 
 }
