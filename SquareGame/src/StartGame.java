@@ -13,18 +13,35 @@ class Cannon extends JLabel {
 }
 
 class Target extends JButton {
-	Target() {
+	int armor;
+	boolean toLeft = false;
+	
+	Target(int arm) {
 		super();
+		armor = arm;
+	}
+	
+	public void getDamage() {
+		if (armor >= 1) {
+			armor--;
+			setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
+					armor * 2, armor * 2, Color.black));
+			setText(String.valueOf(armor));
+			toLeft = !toLeft;
+		} else {
+			setBackground(Color.black);
+			setText("@@@");
+		}
 	}
 }
 
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
 	final static int FlyBulletTime = 4600;
-	public int borderWidth;
+	final int borderWidth = 2;
 	Cannon cannon;
 	Target target;
-	Timer tick;
+	Timer reloadTimer;
 	Timer tack;
 	final public static String iconPath = "icon/";
 	ImageIcon defaultImage = new ImageIcon(getClass().getResource(
@@ -46,18 +63,17 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		setLayout(null);
 		setResizable(false);
 		setVisible(true);
-		tick = new Timer(1000, this);
-		tick.setActionCommand("reload");
+		reloadTimer = new Timer(1000, this);
+		reloadTimer.setActionCommand("reload");
 		tack = new Timer(10, this);
 		tack.setActionCommand("targetMove");
 		addKeyListener(this);
 		
-		borderWidth = 4;
-		target = new Target();
+		target = new Target(borderWidth);
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
-		target.setBorder(BorderFactory.createMatteBorder(0, borderWidth, borderWidth, borderWidth, Color.black));
+		target.setBorder(BorderFactory.createMatteBorder(0, borderWidth * 2, borderWidth * 2, borderWidth * 2, Color.black));
 		target.setFocusable(false);
-		target.setText(String.valueOf(borderWidth / 2));
+		target.setText(String.valueOf(borderWidth));
 		target.addActionListener(this);
 		add(target);
 		tack.start();
@@ -108,7 +124,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			new Bullet(this);
 			repaint();
 			reloadSch = ReloadTime;
-			tick.start();
+			reloadTimer.start();
 			break;
 		}
 	}
@@ -122,20 +138,20 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			} else {
 				cannon.setIcon(defaultImage);
 				addKeyListener(this);
-				tick.stop();
+				reloadTimer.stop();
 			}
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("targetMove")) {
-			if (toLeft) {
+			if (target.toLeft) {
 				if (target.getX() > 0)
 					target.setLocation(target.getX() - 1, target.getY());
 				else 
-					toLeft = false;
+					target.toLeft = false;
 			} else {
 				if (target.getX() + 64 < getWidth() - 17)
 					target.setLocation(target.getX() + 1, target.getY());
 				else
-					toLeft = true;
+					target.toLeft = true;
 			}
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
@@ -210,17 +226,9 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 								getX() + 32 - p < frame.target.getX() + 64) {
 							flyTimer.stop();
 							frame.remove(this);
-							if (frame.borderWidth >= 2) {
-								frame.borderWidth -= 2;
-								frame.target.setBorder(BorderFactory.createMatteBorder(0, frame.borderWidth,
-										frame.borderWidth, frame.borderWidth, Color.black));
-								frame.target.setText(String.valueOf(frame.borderWidth / 2));
-								frame.toLeft = !frame.toLeft;
-							} else {
-								frame.target.setBackground(Color.black);
-								frame.target.setText("@@@");
+							frame.target.getDamage();
+							if (frame.target.getText().equalsIgnoreCase("@@@"))
 								frame.tack.stop();
-							}
 							frame.repaint();
 						}
 						p += 2;
@@ -238,7 +246,6 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 public class StartGame {
 
 	public static void main(String[] args) {
-		
 		setLook();
 		new GameFieldFrame(300, 300);
 	}
