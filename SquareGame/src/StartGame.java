@@ -19,23 +19,25 @@ class Target extends JButton {
 	Target(int armor) {
 		super();
 		this.armor = armor;
-		setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
-				armor * 2, armor * 2, Color.black));
+		displayArmor();
 		setFocusable(false);
-		setText(String.valueOf(armor));
 	}
 	
 	public void getDamage() {
 		if (armor >= 1) {
 			armor--;
-			setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
-					armor * 2, armor * 2, Color.black));
-			setText(String.valueOf(armor));
+			displayArmor();
 			toLeft = !toLeft;
 		} else {
 			setBackground(Color.black);
 			setText("@@@");
 		}
+	}
+	
+	private void displayArmor() {
+		setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
+				armor * 2, armor * 2, Color.black));
+		setText(String.valueOf(armor));
 	}
 }
 
