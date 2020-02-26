@@ -3,11 +3,20 @@ import java.awt.Color;
 import java.awt.event.*;
 import javax.swing.*;
 
+class Cannon extends JLabel {
+	Cannon() {
+		super();
+	}
+	Cannon(ImageIcon i) {
+		super(i);
+	}
+}
+
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
 	final static int FlyBulletTime = 4600;
 	public int borderWidth;
-	JLabel destroyer;
+	Cannon destroyer;
 	JButton target;
 	Timer tick;
 	Timer tack;
@@ -47,7 +56,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		add(target);
 		tack.start();
 		
-		destroyer = new JLabel(defaultImage);
+		destroyer = new Cannon(defaultImage);
 		destroyer.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
 		add(destroyer);
 	}
