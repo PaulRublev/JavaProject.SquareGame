@@ -24,20 +24,21 @@ class Target extends JButton {
 	}
 	
 	public void getDamage() {
-		if (armor >= 1) {
+		if (armor >= 0) {
 			armor--;
-			displayArmor();
 			toLeft = !toLeft;
-		} else {
-			setBackground(Color.black);
-			setText("@@@");
 		}
+		displayArmor();
 	}
 	
 	private void displayArmor() {
-		setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
-				armor * 2, armor * 2, Color.black));
-		setText(String.valueOf(armor));
+		if (armor >= 0) {
+			setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
+					armor * 2, armor * 2, Color.black));
+			setText(String.valueOf(armor));	
+		} else {
+			setText("@@@");
+		}
 	}
 }
 
