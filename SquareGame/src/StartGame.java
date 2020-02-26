@@ -4,7 +4,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-class FrameField extends JFrame implements KeyListener, ActionListener {
+class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
 	final static int FlyBulletTime = 4600;
 	public int borderWidth;
@@ -23,7 +23,7 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 	int reloadSch, mul = 1, sch = 0;
 	public boolean toLeft = false;
 	
-	FrameField(int j, int k) {
+	GameFieldFrame(int j, int k) {
 		setBounds(j, k, 350, 450);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
@@ -102,9 +102,7 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
 			if (reloadSch > 1) {
 				reloadSch--;
-				//System.out.print(r + ", ");
 			} else {
-				//System.out.print(r - 1);
 				destroyer.setIcon(defaultImage);
 				addKeyListener(this);
 				tick.stop();
@@ -125,19 +123,19 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
 			setVisible(false);
-			new FrameField(getX(), getY());
+			new GameFieldFrame(getX(), getY());
 		}
 	}
 }
 
 class Bullet extends JLabel implements KeyListener, ActionListener {
 	ImageIcon bulImage = new ImageIcon(getClass().getResource(
-			FrameField.iconPath + "bullet.png"));
-	FrameField frame;
+			GameFieldFrame.iconPath + "bullet.png"));
+	GameFieldFrame frame;
 	Timer flyTimer;
 	int f, i, y, p = 0;
 	
-	Bullet(FrameField frame) {
+	Bullet(GameFieldFrame frame) {
 		this.frame = frame;
 		setBounds(frame.destroyer.getX(), frame.getHeight() - 64 - 105, 64, 64);
 		setIcon(bulImage);
@@ -145,7 +143,7 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 		frame.add(this);
 		flyTimer = new Timer(1, this);
 		flyTimer.setActionCommand("fly");
-		f = FrameField.FlyBulletTime;
+		f = GameFieldFrame.FlyBulletTime;
 		y = getY();
 		i = 0;
 		flyTimer.start();
@@ -155,7 +153,6 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 		
 	}
 	public void keyPressed(KeyEvent e) {
-		//System.out.print(" " + e.getExtendedKeyCode() + "!");
 		switch (e.getExtendedKeyCode()) {
 		case 37:
 			if (getX() > 0) {
@@ -191,7 +188,6 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 					if (getY() <= 32 && p <= 32) {
 						if (getX() + 32 + p > frame.target.getX() &&
 								getX() + 32 - p < frame.target.getX() + 64) {
-							//System.out.print("\n@@@");
 							flyTimer.stop();
 							frame.remove(this);
 							if (frame.borderWidth >= 2) {
@@ -224,15 +220,13 @@ public class StartGame {
 	public static void main(String[] args) {
 		
 		setLook();
-		new FrameField(300, 300);
+		new GameFieldFrame(300, 300);
 	}
 	
 	private static void setLook() {
 		try {
 			// Set System L&F
-			UIManager.setLookAndFeel(
-					// UIManager.getCrossPlatformLookAndFeelClassName());
-					UIManager.getSystemLookAndFeelClassName());
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.out.print(e);
 		}
