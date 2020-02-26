@@ -20,7 +20,7 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 			iconPath + "toRight.png"));
 	ImageIcon reloadImage = new ImageIcon(getClass().getResource(
 			iconPath + "reload.png"));
-	int i, r, mul = 1, sch = 0;
+	int reloadSch, mul = 1, sch = 0;
 	public boolean toLeft = false;
 	
 	FrameField(int j, int k) {
@@ -90,7 +90,7 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 			destroyer.setIcon(reloadImage);
 			new Bullet(this);
 			repaint();
-			r = ReloadTime;
+			reloadSch = ReloadTime;
 			tick.start();
 			break;
 		}
@@ -100,8 +100,8 @@ class FrameField extends JFrame implements KeyListener, ActionListener {
 	}
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
-			if (r > 1) {
-				r--;
+			if (reloadSch > 1) {
+				reloadSch--;
 				//System.out.print(r + ", ");
 			} else {
 				//System.out.print(r - 1);
@@ -227,20 +227,14 @@ public class StartGame {
 		new FrameField(300, 300);
 	}
 	
-	static void setLook() {
+	private static void setLook() {
 		try {
 			// Set System L&F
 			UIManager.setLookAndFeel(
 					// UIManager.getCrossPlatformLookAndFeelClassName());
 					UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException e) {
-			// handle exception
-		} catch (ClassNotFoundException e) {
-			// handle exception
-		} catch (InstantiationException e) {
-			// handle exception
-		} catch (IllegalAccessException e) {
-			// handle exception
+		} catch (Exception e) {
+			System.out.print(e);
 		}
 	}
 
