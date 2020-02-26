@@ -19,6 +19,10 @@ class Target extends JButton {
 	Target(int armor) {
 		super();
 		this.armor = armor;
+		setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
+				armor * 2, armor * 2, Color.black));
+		setFocusable(false);
+		setText(String.valueOf(armor));
 	}
 	
 	public void getDamage() {
@@ -38,7 +42,7 @@ class Target extends JButton {
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
 	final static int FlyBulletTime = 4600;
-	final int borderWidth = 2;
+	final int initialArmor = 2;
 	Cannon cannon;
 	Target target;
 	Timer reloadTimer;
@@ -69,11 +73,8 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		tack.setActionCommand("targetMove");
 		addKeyListener(this);
 		
-		target = new Target(borderWidth);
+		target = new Target(initialArmor);
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
-		target.setBorder(BorderFactory.createMatteBorder(0, borderWidth * 2, borderWidth * 2, borderWidth * 2, Color.black));
-		target.setFocusable(false);
-		target.setText(String.valueOf(borderWidth));
 		target.addActionListener(this);
 		add(target);
 		tack.start();
