@@ -20,47 +20,41 @@ class Resourses {
 	}
 }
 
-enum Direction {
-	DEFAULT("default"),
-	RELOAD("reload"),
-	TO_LEFT("toLeft"),
-	TO_RIGHT("toRight");
-	
-	private String direction;
-    Direction(String direction){
-        this.direction = direction;
-    }
-    public String getDirection(){ return direction;}
+enum CannonState {
+	DEFAULT,
+	RELOAD,
+	TO_LEFT,
+	TO_RIGHT;
 }
 
 class Cannon extends JLabel {
-	private Direction direction;
+	private CannonState direction;
 	private Resourses imageResourses;
 	
 	Cannon(Resourses res) {
 		super();
 		imageResourses = res;
-		direction = Direction.DEFAULT;
+		direction = CannonState.DEFAULT;
 		setCannonImage();
 	}
 	
-	public void setDirection(Direction direction) {
+	public void setDirection(CannonState direction) {
 		this.direction = direction;
 		setCannonImage();
 	}
 	
 	private void setCannonImage() {
-		switch (direction.getDirection()) {
-		case "default":
+		switch (direction) {
+		case DEFAULT:
 			setIcon(imageResourses.defaultImage);
 			break;
-		case "reload":
+		case RELOAD:
 			setIcon(imageResourses.reloadImage);
 			break;
-		case "toLeft":
+		case TO_LEFT:
 			setIcon(imageResourses.toLeftImage);
 			break;
-		case "toRight":
+		case TO_RIGHT:
 			setIcon(imageResourses.toRightImage);
 			break;
 		}
@@ -132,7 +126,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		
 		cannon = new Cannon(imageResourses);
 		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
-		cannon.setDirection(Direction.DEFAULT);
+		cannon.setDirection(CannonState.DEFAULT);
 		add(cannon);
 		repaint();
 	}
@@ -145,7 +139,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	public void keyPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			cannon.setDirection(Direction.TO_LEFT);
+			cannon.setDirection(CannonState.TO_LEFT);
 			if (cannon.getX() > 0) {
 				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
 				sch++;
@@ -158,7 +152,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			}
 			break;
 		case 39:
-			cannon.setDirection(Direction.TO_RIGHT);
+			cannon.setDirection(CannonState.TO_RIGHT);
 			if (cannon.getX() < getWidth() - 17 - 64) {
 				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
 				sch++;
@@ -174,7 +168,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			removeKeyListener(this);
 			mul = 1;
 			sch = 0;
-			cannon.setDirection(Direction.RELOAD);
+			cannon.setDirection(CannonState.RELOAD);
 			new Bullet(this, imageResourses);
 			repaint();
 			reloadSch = ReloadTime;
@@ -190,7 +184,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			if (reloadSch > 1) {
 				reloadSch--;
 			} else {
-				cannon.setDirection(Direction.DEFAULT);
+				cannon.setDirection(CannonState.DEFAULT);
 				addKeyListener(this);
 				reloadTimer.stop();
 			}
