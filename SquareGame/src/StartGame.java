@@ -66,13 +66,15 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	Cannon cannon;
 	Target target;
 	Timer reloadTimer;
-	Timer tack;
+	Timer targetMoveTimer;
 	int reloadSch;
 	int mul = 1;
 	int sch = 0;
 	public boolean toLeft = false;
+	Resourses imageResourses;
 	
-	GameFieldFrame(int x, int y) {
+	GameFieldFrame(int x, int y, Resourses res) {
+		imageResourses = res;
 		setBounds(x, y, 350, 450);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
@@ -80,31 +82,31 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		setVisible(true);
 		reloadTimer = new Timer(1000, this);
 		reloadTimer.setActionCommand("reload");
-		tack = new Timer(10, this);
-		tack.setActionCommand("targetMove");
+		targetMoveTimer = new Timer(10, this);
+		targetMoveTimer.setActionCommand("targetMove");
 		addKeyListener(this);
 		
 		target = new Target(initialArmor);
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
 		target.addActionListener(this);
 		add(target);
-		tack.start();
+		targetMoveTimer.start();
 		
-		cannon = new Cannon(new Resourses().defaultImage);
+		cannon = new Cannon(imageResourses.defaultImage);
 		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
 		add(cannon);
 		repaint();
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		cannon.setIcon(new Resourses().defaultImage);
+		cannon.setIcon(imageResourses.defaultImage);
 		mul = 1;
 		sch = 0;
 	}
 	public void keyPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			cannon.setIcon(new Resourses().toLeftImage);
+			cannon.setIcon(imageResourses.toLeftImage);
 			if (cannon.getX() > 0) {
 				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
 				sch++;
@@ -117,7 +119,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			}
 			break;
 		case 39:
-			cannon.setIcon(new Resourses().toRightImage);
+			cannon.setIcon(imageResourses.toRightImage);
 			if (cannon.getX() < getWidth() - 17 - 64) {
 				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
 				sch++;
@@ -133,8 +135,8 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			removeKeyListener(this);
 			mul = 1;
 			sch = 0;
-			cannon.setIcon(new Resourses().reloadImage);
-			new Bullet(this);
+			cannon.setIcon(imageResourses.reloadImage);
+			new Bullet(this, imageResourses);
 			repaint();
 			reloadSch = ReloadTime;
 			reloadTimer.start();
@@ -149,7 +151,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			if (reloadSch > 1) {
 				reloadSch--;
 			} else {
-				cannon.setIcon(new Resourses().defaultImage);
+				cannon.setIcon(imageResourses.defaultImage);
 				addKeyListener(this);
 				reloadTimer.stop();
 			}
@@ -169,23 +171,25 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
 			setVisible(false);
-			new GameFieldFrame(getX(), getY());
+			new GameFieldFrame(getX(), getY(), imageResourses);
 		}
 	}
 }
 
 class Bullet extends JLabel implements KeyListener, ActionListener {
 	GameFieldFrame frame;
+	Resourses imageResourses;
 	Timer flyTimer;
 	int f;
 	int i;
 	int y;
 	int p = 0;
 	
-	Bullet(GameFieldFrame frame) {
+	Bullet(GameFieldFrame frame, Resourses res) {
 		this.frame = frame;
+		imageResourses = res;
 		setBounds(frame.cannon.getX(), frame.getHeight() - 64 - 105, 64, 64);
-		setIcon(new Resourses().bulletImage);
+		setIcon(imageResourses.bulletImage);
 		frame.addKeyListener(this);
 		frame.add(this);
 		flyTimer = new Timer(1, this);
@@ -239,7 +243,7 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 							frame.remove(this);
 							frame.target.getDamage();
 							if (frame.target.getText().equalsIgnoreCase("@@@"))
-								frame.tack.stop();
+								frame.targetMoveTimer.stop();
 							frame.repaint();
 						}
 						p += 2;
@@ -258,7 +262,7 @@ public class StartGame {
 
 	public static void main(String[] args) {
 		setLook();
-		new GameFieldFrame(300, 300);
+		new GameFieldFrame(300, 300, new Resourses());
 	}
 	
 	private static void setLook() {
