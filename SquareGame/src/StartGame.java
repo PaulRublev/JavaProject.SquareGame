@@ -126,16 +126,16 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		
 		cannon = new Cannon(imageResourses);
 		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
-		cannon.setDirection(CannonState.DEFAULT);
 		add(cannon);
 		repaint();
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		cannon.setIcon(imageResourses.defaultImage);
+		cannon.setDirection(CannonState.DEFAULT);
 		mul = 1;
 		sch = 0;
 	}
+	
 	public void keyPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
@@ -176,9 +176,11 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			break;
 		}
 	}
+	
 	public void keyTyped(KeyEvent ke) {
-		
+		//required by KeyListener interface, left empty as not used
 	}
+	
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
 			if (reloadSch > 1) {
@@ -233,9 +235,11 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 		flyTimer.start();
 		
 	}
+	
 	public void keyTyped(KeyEvent e) {
-		
+		//required by KeyListener interface, left empty as not used
 	}
+	
 	public void keyPressed(KeyEvent e) {
 		switch (e.getExtendedKeyCode()) {
 		case 37:
@@ -254,8 +258,9 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 			break;
 		}
 	}
+	
 	public void keyReleased(KeyEvent e) {
-		
+		//required by KeyListener interface, left empty as not used
 	}
 
 	public void actionPerformed(ActionEvent ae) {
