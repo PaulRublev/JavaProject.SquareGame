@@ -3,6 +3,23 @@ import java.awt.Color;
 import java.awt.event.*;
 import javax.swing.*;
 
+class Resourses {
+	private final String iconPath = "icon/";
+	final ImageIcon defaultImage;
+	final ImageIcon toLeftImage;
+	final ImageIcon toRightImage;
+	final ImageIcon reloadImage;
+	final ImageIcon bulletImage;
+	
+	Resourses() {
+		defaultImage = new ImageIcon(getClass().getResource(iconPath + "hold.png"));
+		toLeftImage = new ImageIcon(getClass().getResource(iconPath + "toLeft.png"));
+		toRightImage = new ImageIcon(getClass().getResource(iconPath + "toRight.png"));
+		reloadImage = new ImageIcon(getClass().getResource(iconPath + "reload.png"));
+		bulletImage = new ImageIcon(getClass().getResource(iconPath + "bullet.png"));
+	}
+}
+
 class Cannon extends JLabel {
 	Cannon() {
 		super();
@@ -50,15 +67,6 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	Target target;
 	Timer reloadTimer;
 	Timer tack;
-	final public static String iconPath = "icon/";
-	ImageIcon defaultImage = new ImageIcon(getClass().getResource(
-			iconPath + "hold.png"));
-	ImageIcon toLeftImage = new ImageIcon(getClass().getResource(
-			iconPath + "toLeft.png"));
-	ImageIcon toRightImage = new ImageIcon(getClass().getResource(
-			iconPath + "toRight.png"));
-	ImageIcon reloadImage = new ImageIcon(getClass().getResource(
-			iconPath + "reload.png"));
 	int reloadSch;
 	int mul = 1;
 	int sch = 0;
@@ -82,20 +90,21 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		add(target);
 		tack.start();
 		
-		cannon = new Cannon(defaultImage);
+		cannon = new Cannon(new Resourses().defaultImage);
 		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
 		add(cannon);
+		repaint();
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		cannon.setIcon(defaultImage);
+		cannon.setIcon(new Resourses().defaultImage);
 		mul = 1;
 		sch = 0;
 	}
 	public void keyPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			cannon.setIcon(toLeftImage);
+			cannon.setIcon(new Resourses().toLeftImage);
 			if (cannon.getX() > 0) {
 				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
 				sch++;
@@ -108,7 +117,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			}
 			break;
 		case 39:
-			cannon.setIcon(toRightImage);
+			cannon.setIcon(new Resourses().toRightImage);
 			if (cannon.getX() < getWidth() - 17 - 64) {
 				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
 				sch++;
@@ -124,7 +133,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			removeKeyListener(this);
 			mul = 1;
 			sch = 0;
-			cannon.setIcon(reloadImage);
+			cannon.setIcon(new Resourses().reloadImage);
 			new Bullet(this);
 			repaint();
 			reloadSch = ReloadTime;
@@ -140,7 +149,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			if (reloadSch > 1) {
 				reloadSch--;
 			} else {
-				cannon.setIcon(defaultImage);
+				cannon.setIcon(new Resourses().defaultImage);
 				addKeyListener(this);
 				reloadTimer.stop();
 			}
@@ -166,8 +175,6 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 }
 
 class Bullet extends JLabel implements KeyListener, ActionListener {
-	ImageIcon bulImage = new ImageIcon(getClass().getResource(
-			GameFieldFrame.iconPath + "bullet.png"));
 	GameFieldFrame frame;
 	Timer flyTimer;
 	int f;
@@ -178,7 +185,7 @@ class Bullet extends JLabel implements KeyListener, ActionListener {
 	Bullet(GameFieldFrame frame) {
 		this.frame = frame;
 		setBounds(frame.cannon.getX(), frame.getHeight() - 64 - 105, 64, 64);
-		setIcon(bulImage);
+		setIcon(new Resourses().bulletImage);
 		frame.addKeyListener(this);
 		frame.add(this);
 		flyTimer = new Timer(1, this);
