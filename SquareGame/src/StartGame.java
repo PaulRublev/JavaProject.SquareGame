@@ -1,5 +1,7 @@
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -38,7 +40,7 @@ class Cannon extends JLabel {
 		setCannonImage();
 	}
 	
-	public void setDirection(CannonState direction) {
+	public void setState(CannonState direction) {
 		this.direction = direction;
 		setCannonImage();
 	}
@@ -62,6 +64,7 @@ class Cannon extends JLabel {
 }
 
 class Target extends JButton {
+	int waitCounter = 0;
 	int armor;
 	boolean toLeft = false;
 	
@@ -91,15 +94,30 @@ class Target extends JButton {
 	}
 }
 
+class Bullet extends JLabel {
+	Resourses imageResourses;
+	boolean exist = false;
+	int waitCounter = 0;
+	int edge = 0;
+	
+	Bullet(Resourses res) {
+		imageResourses = res;
+		setIcon(imageResourses.bulletImage);
+		exist = true;
+	}
+}
+
 class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	final int ReloadTime = 2;
-	final static int FlyBulletTime = 4600;
 	final int initialArmor = 2;
+	Dimension FieldSize = new Dimension(350, 450);
 	Cannon cannon;
 	Target target;
+	Bullet[] bullets;
+	int bulletNumber = 0;
+	boolean bulletCtrl = false;
 	Timer reloadTimer;
-	Timer targetMoveTimer;
-	int reloadSch;
+	Timer movementTimer;
 	int mul = 1;
 	int sch = 0;
 	public boolean toLeft = false;
@@ -107,22 +125,24 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	
 	GameFieldFrame(int x, int y, Resourses res) {
 		imageResourses = res;
-		setBounds(x, y, 350, 450);
+		setLocation(x, y);
+		setSize(FieldSize);
+		bullets = new Bullet[6];
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
 		setVisible(true);
-		reloadTimer = new Timer(1000, this);
+		reloadTimer = new Timer(ReloadTime * 1000, this);
 		reloadTimer.setActionCommand("reload");
-		targetMoveTimer = new Timer(10, this);
-		targetMoveTimer.setActionCommand("targetMove");
+		movementTimer = new Timer(1, this);
+		movementTimer.setActionCommand("movement");
 		addKeyListener(this);
 		
 		target = new Target(initialArmor);
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
 		target.addActionListener(this);
 		add(target);
-		targetMoveTimer.start();
+		movementTimer.start();
 		
 		cannon = new Cannon(imageResourses);
 		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
@@ -131,15 +151,18 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		cannon.setDirection(CannonState.DEFAULT);
-		mul = 1;
-		sch = 0;
+		if (!bulletCtrl) {
+			cannon.setState(CannonState.DEFAULT);
+			mul = 1;
+			sch = 0;
+		}
 	}
 	
 	public void keyPressed(KeyEvent ke) {
+		if (!bulletCtrl)
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			cannon.setDirection(CannonState.TO_LEFT);
+			cannon.setState(CannonState.TO_LEFT);
 			if (cannon.getX() > 0) {
 				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
 				sch++;
@@ -152,7 +175,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			}
 			break;
 		case 39:
-			cannon.setDirection(CannonState.TO_RIGHT);
+			cannon.setState(CannonState.TO_RIGHT);
 			if (cannon.getX() < getWidth() - 17 - 64) {
 				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
 				sch++;
@@ -165,15 +188,36 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 			}
 			break;
 		case 32:
-			removeKeyListener(this);
 			mul = 1;
 			sch = 0;
-			cannon.setDirection(CannonState.RELOAD);
-			new Bullet(this, imageResourses);
+			cannon.setState(CannonState.RELOAD);
+			bullets[bulletNumber] = new Bullet(imageResourses);
+			bullets[bulletNumber].setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
+			bulletCtrl = true;
+			add(bullets[bulletNumber]);
 			repaint();
-			reloadSch = ReloadTime;
 			reloadTimer.start();
 			break;
+		} else {
+			switch (ke.getExtendedKeyCode()) {
+			case 37:
+				if (bullets[bulletNumber].getX() > 0) {
+					bullets[bulletNumber].setLocation((bullets[bulletNumber].getX() - 2),
+							bullets[bulletNumber].getY());
+				} else {
+					bullets[bulletNumber].setLocation(0, bullets[bulletNumber].getY());
+				}
+				break;
+			case 39:
+				if (bullets[bulletNumber].getX() < getWidth() - 17 - 64) {
+					bullets[bulletNumber].setLocation((bullets[bulletNumber].getX() + 2),
+							bullets[bulletNumber].getY());
+				} else {
+					bullets[bulletNumber].setLocation(getWidth() - 17 - 64,
+							bullets[bulletNumber].getY());
+				}
+				break;
+			}
 		}
 	}
 	
@@ -183,115 +227,57 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
-			if (reloadSch > 1) {
-				reloadSch--;
-			} else {
-				cannon.setDirection(CannonState.DEFAULT);
-				addKeyListener(this);
-				reloadTimer.stop();
-			}
+			bulletCtrl = false;
+			if (bulletNumber == 5)
+				bulletNumber = 0;
+			else
+				bulletNumber++;
+			cannon.setState(CannonState.DEFAULT);
+			reloadTimer.stop();
 		}
-		if (ae.getActionCommand().equalsIgnoreCase("targetMove")) {
-			if (target.toLeft) {
-				if (target.getX() > 0)
-					target.setLocation(target.getX() - 1, target.getY());
-				else 
-					target.toLeft = false;
-			} else {
-				if (target.getX() + 64 < getWidth() - 17)
-					target.setLocation(target.getX() + 1, target.getY());
-				else
-					target.toLeft = true;
+		if (ae.getActionCommand().equalsIgnoreCase("movement")) {
+			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= 10) {
+				target.waitCounter = 0;
+				if (target.toLeft) {
+					if (target.getX() > 0)
+						target.setLocation(target.getX() - 1, target.getY());
+					else 
+						target.toLeft = false;
+				} else {
+					if (target.getX() + 64 < getWidth() - 17)
+						target.setLocation(target.getX() + 1, target.getY());
+					else
+						target.toLeft = true;
+				}
+			}
+			
+			for (Bullet bullet : bullets) {
+				if (bullet != null && bullet.exist) {
+					if (++bullet.waitCounter >= 4 && bullet.getY() > 1) {
+						bullet.waitCounter = 0;
+						bullet.setLocation(bullet.getX(), bullet.getY() - 1);
+						repaint();
+						if (bullet.getY() <= 32 && bullet.edge <= 32) {
+							if (bullet.getX() + 32 + bullet.edge > target.getX() &&
+									bullet.getX() + 32 - bullet.edge < target.getX() + 64) {
+								remove(bullet);
+								bullet.exist = false;
+								target.getDamage();
+								repaint();
+							}
+							bullet.edge += 2;
+						}
+					} else if (bullet.getY() <= 1) {
+						remove(bullet);
+						bullet.exist = false;
+						repaint();
+					}
+				}
 			}
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
 			setVisible(false);
 			new GameFieldFrame(getX(), getY(), imageResourses);
-		}
-	}
-}
-
-class Bullet extends JLabel implements KeyListener, ActionListener {
-	GameFieldFrame frame;
-	Resourses imageResourses;
-	Timer flyTimer;
-	int f;
-	int i;
-	int y;
-	int p = 0;
-	
-	Bullet(GameFieldFrame frame, Resourses res) {
-		this.frame = frame;
-		imageResourses = res;
-		setBounds(frame.cannon.getX(), frame.getHeight() - 64 - 105, 64, 64);
-		setIcon(imageResourses.bulletImage);
-		frame.addKeyListener(this);
-		frame.add(this);
-		flyTimer = new Timer(1, this);
-		flyTimer.setActionCommand("fly");
-		f = GameFieldFrame.FlyBulletTime;
-		y = getY();
-		i = 0;
-		flyTimer.start();
-		
-	}
-	
-	public void keyTyped(KeyEvent e) {
-		//required by KeyListener interface, left empty as not used
-	}
-	
-	public void keyPressed(KeyEvent e) {
-		switch (e.getExtendedKeyCode()) {
-		case 37:
-			if (getX() > 0) {
-				setLocation((getX() - 1), getY());
-			} else {
-				setLocation(0, getY());
-			}
-			break;
-		case 39:
-			if (getX() < frame.getWidth() - 17 - 64) {
-				setLocation((getX() + 1), getY());
-			} else {
-				setLocation(frame.getWidth() - 17 - 64, getY());
-			}
-			break;
-		}
-	}
-	
-	public void keyReleased(KeyEvent e) {
-		//required by KeyListener interface, left empty as not used
-	}
-
-	public void actionPerformed(ActionEvent ae) {
-		if (ae.getActionCommand().equalsIgnoreCase("fly")) {
-			if (f == 4000)
-				frame.removeKeyListener(this);
-			if (f > 1) {
-				f--;
-				i++;
-				if (i >= 14 && y > 1) {
-					i = 0;
-					y--;
-					setLocation(getX(), y);
-					if (getY() <= 32 && p <= 32) {
-						if (getX() + 32 + p > frame.target.getX() &&
-								getX() + 32 - p < frame.target.getX() + 64) {
-							flyTimer.stop();
-							frame.remove(this);
-							frame.target.getDamage();
-							if (frame.target.getText().equalsIgnoreCase("@@@"))
-								frame.targetMoveTimer.stop();
-							frame.repaint();
-						}
-						p += 2;
-					}
-				}
-			} else {
-				frame.remove(this);
-				frame.repaint();
-				flyTimer.stop();
-			}
 		}
 	}
 }
