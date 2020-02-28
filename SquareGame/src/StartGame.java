@@ -5,7 +5,7 @@ import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.*;
 
-class Resourses {
+final class Resourses {
 	private final String iconPath = "icon/";
 	final ImageIcon defaultImage;
 	final ImageIcon toLeftImage;
@@ -29,24 +29,24 @@ enum CannonState {
 	TO_RIGHT;
 }
 
-class Cannon extends JLabel {
-	private CannonState direction;
+final class Cannon extends JLabel {
+	private CannonState state;
 	private Resourses imageResourses;
 	
 	Cannon(Resourses res) {
 		super();
 		imageResourses = res;
-		direction = CannonState.DEFAULT;
+		state = CannonState.DEFAULT;
 		setCannonImage();
 	}
 	
-	public void setState(CannonState direction) {
-		this.direction = direction;
+	public void setState(CannonState state) {
+		this.state = state;
 		setCannonImage();
 	}
 	
 	private void setCannonImage() {
-		switch (direction) {
+		switch (state) {
 		case DEFAULT:
 			setIcon(imageResourses.defaultImage);
 			break;
@@ -63,9 +63,9 @@ class Cannon extends JLabel {
 	}
 }
 
-class Target extends JButton {
+final class Target extends JButton {
 	int waitCounter = 0;
-	int armor;
+	private int armor;
 	boolean toLeft = false;
 	
 	Target(int armor) {
@@ -94,7 +94,7 @@ class Target extends JButton {
 	}
 }
 
-class Bullet extends JLabel {
+final class Bullet extends JLabel {
 	Resourses imageResourses;
 	boolean exist = false;
 	int waitCounter = 0;
@@ -107,9 +107,9 @@ class Bullet extends JLabel {
 	}
 }
 
-class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
-	final int ReloadTime = 2;
-	final int initialArmor = 2;
+final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
+	final int RELOAD_TIME = 2;
+	final int INITIAL_ARMOR = 2;
 	Dimension FieldSize = new Dimension(350, 450);
 	Cannon cannon;
 	Target target;
@@ -118,27 +118,27 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	boolean bulletCtrl = false;
 	Timer reloadTimer;
 	Timer movementTimer;
-	int mul = 1;
-	int sch = 0;
+	int cannonAccelerator = 1;
+	int keyPressedCounter = 0;
 	public boolean toLeft = false;
 	Resourses imageResourses;
 	
-	GameFieldFrame(int x, int y, Resourses res) {
+	GameFieldFrame(Point location, Resourses res) {
 		imageResourses = res;
-		setLocation(x, y);
+		setLocation(location);
 		setSize(FieldSize);
 		bullets = new Bullet[6];
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
 		setVisible(true);
-		reloadTimer = new Timer(ReloadTime * 1000, this);
+		reloadTimer = new Timer(RELOAD_TIME * 1000, this);
 		reloadTimer.setActionCommand("reload");
 		movementTimer = new Timer(1, this);
 		movementTimer.setActionCommand("movement");
 		addKeyListener(this);
 		
-		target = new Target(initialArmor);
+		target = new Target(INITIAL_ARMOR);
 		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
 		target.addActionListener(this);
 		add(target);
@@ -153,8 +153,8 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	public void keyReleased(KeyEvent ke) {
 		if (!bulletCtrl) {
 			cannon.setState(CannonState.DEFAULT);
-			mul = 1;
-			sch = 0;
+			cannonAccelerator = 1;
+			keyPressedCounter = 0;
 		}
 	}
 	
@@ -164,12 +164,12 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		case 37:
 			cannon.setState(CannonState.TO_LEFT);
 			if (cannon.getX() > 0) {
-				cannon.setLocation((cannon.getX() - 1 * mul), cannon.getY());
-				sch++;
-				if (sch == 25) 
-					mul = 2;
-				else if (sch == 70) 
-					mul = 4;
+				cannon.setLocation((cannon.getX() - 1 * cannonAccelerator), cannon.getY());
+				keyPressedCounter++;
+				if (keyPressedCounter == 25) 
+					cannonAccelerator = 2;
+				else if (keyPressedCounter == 70) 
+					cannonAccelerator = 4;
 			} else {
 				cannon.setLocation(0, cannon.getY());
 			}
@@ -177,19 +177,19 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		case 39:
 			cannon.setState(CannonState.TO_RIGHT);
 			if (cannon.getX() < getWidth() - 17 - 64) {
-				cannon.setLocation((cannon.getX() + 1 * mul), cannon.getY());
-				sch++;
-				if (sch == 25) 
-					mul = 2;
-				else if (sch == 70) 
-					mul = 4;
+				cannon.setLocation((cannon.getX() + 1 * cannonAccelerator), cannon.getY());
+				keyPressedCounter++;
+				if (keyPressedCounter == 25) 
+					cannonAccelerator = 2;
+				else if (keyPressedCounter == 70) 
+					cannonAccelerator = 4;
 			} else {
 				cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
 			}
 			break;
 		case 32:
-			mul = 1;
-			sch = 0;
+			cannonAccelerator = 1;
+			keyPressedCounter = 0;
 			cannon.setState(CannonState.RELOAD);
 			bullets[bulletNumber] = new Bullet(imageResourses);
 			bullets[bulletNumber].setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
@@ -277,7 +277,7 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 		}
 		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
 			setVisible(false);
-			new GameFieldFrame(getX(), getY(), imageResourses);
+			new GameFieldFrame(getLocation(), imageResourses);
 		}
 	}
 }
@@ -285,8 +285,9 @@ class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 public class StartGame {
 
 	public static void main(String[] args) {
+		final Point INITIAL_LOCATION = new Point(300, 300);
 		setLook();
-		new GameFieldFrame(300, 300, new Resourses());
+		new GameFieldFrame(INITIAL_LOCATION, new Resourses());
 	}
 	
 	private static void setLook() {
