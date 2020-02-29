@@ -34,12 +34,14 @@ enum CannonState {
 final class Cannon extends JLabel {
 	private CannonState state;
 	private Resourses imageResourses;
+	int accelerator;
 	
 	Cannon(Resourses res) {
 		super();
 		imageResourses = res;
 		state = CannonState.DEFAULT;
 		setCannonImage();
+		accelerator = 1;
 	}
 	
 	public void setState(CannonState state) {
@@ -61,6 +63,22 @@ final class Cannon extends JLabel {
 		case TO_RIGHT:
 			setIcon(imageResourses.toRightImage);
 			break;
+		}
+	}
+	
+	public void moving(CannonState state) {
+		int directionSign = 0;
+		if (state.equals(CannonState.TO_LEFT)) {
+			directionSign = -1;
+		} else if (state.equals(CannonState.TO_RIGHT)) {
+			directionSign = 1;
+		}
+		setLocation((getX() + directionSign * accelerator), getY());
+		GameFieldFrame.keyPressedCounter++;
+		if (GameFieldFrame.keyPressedCounter == 25) {
+			accelerator = 2;
+		} else if (GameFieldFrame.keyPressedCounter == 70) {
+			accelerator = 4;
 		}
 	}
 }
@@ -117,8 +135,8 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	boolean bulletCtrl = false;
 	Timer reloadTimer;
 	Timer movementTimer;
-	int cannonAccelerator = 1;
-	int keyPressedCounter = 0;
+	//int cannonAccelerator = 1;
+	static int keyPressedCounter = 0;
 	public boolean toLeft = false;
 	Resourses imageResourses;
 	
@@ -152,7 +170,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	public void keyReleased(KeyEvent ke) {
 		if (!bulletCtrl) {
 			cannon.setState(CannonState.DEFAULT);
-			cannonAccelerator = 1;
+			cannon.accelerator = 1;
 			keyPressedCounter = 0;
 		}
 	}
@@ -163,13 +181,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			case 37:
 				cannon.setState(CannonState.TO_LEFT);
 				if (cannon.getX() > 0) {
-					cannon.setLocation((cannon.getX() - 1 * cannonAccelerator), cannon.getY());
-					keyPressedCounter++;
-					if (keyPressedCounter == 25) {
-						cannonAccelerator = 2;
-					} else if (keyPressedCounter == 70) {
-						cannonAccelerator = 4;
-					}
+					cannon.moving(CannonState.TO_LEFT);
 				} else {
 					cannon.setLocation(0, cannon.getY());
 				}
@@ -177,19 +189,13 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			case 39:
 				cannon.setState(CannonState.TO_RIGHT);
 				if (cannon.getX() < getWidth() - 17 - 64) {
-					cannon.setLocation((cannon.getX() + 1 * cannonAccelerator), cannon.getY());
-					keyPressedCounter++;
-					if (keyPressedCounter == 25) {
-						cannonAccelerator = 2;
-					} else if (keyPressedCounter == 70) {
-						cannonAccelerator = 4;
-					}
+					cannon.moving(CannonState.TO_RIGHT);
 				} else {
 					cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
 				}
 				break;
 			case 32:
-				cannonAccelerator = 1;
+				cannon.accelerator = 1;
 				keyPressedCounter = 0;
 				cannon.setState(CannonState.RELOAD);
 				bullets.add(new Bullet(imageResourses));
