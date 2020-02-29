@@ -126,6 +126,7 @@ final class Bullet extends JLabel {
 }
 
 final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
+	Callback callback;
 	final int RELOAD_TIME = 2;
 	final int INITIAL_ARMOR = 2;
 	Dimension FieldSize = new Dimension(350, 450);
@@ -135,12 +136,12 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	boolean bulletCtrl = false;
 	Timer reloadTimer;
 	Timer movementTimer;
-	//int cannonAccelerator = 1;
 	static int keyPressedCounter = 0;
 	public boolean toLeft = false;
 	Resourses imageResourses;
 	
-	GameFieldFrame(Point location, Resourses res) {
+	GameFieldFrame(Point location, Resourses res, StartGame startGame) {
+		callback = startGame;
 		imageResourses = res;
 		setLocation(location);
 		setSize(FieldSize);
@@ -246,8 +247,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			bulletCtrl = false;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
-		}
-		if (ae.getActionCommand().equalsIgnoreCase("movement")) {
+		} else if (ae.getActionCommand().equalsIgnoreCase("movement")) {
 			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= 10) {
 				target.waitCounter = 0;
 				if (target.toLeft) {
@@ -292,20 +292,25 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 					bullets.remove();
 				}
 			}
-		}
-		if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
-			setVisible(false);
-			new GameFieldFrame(getLocation(), imageResourses);
+		} else if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
+			dispose();
+			callback.execute(getLocation(), imageResourses);
 		}
 	}
 }
 
-public class StartGame {
+interface Callback {
+	void execute(Point location, Resourses res);
+}
 
+public class StartGame implements Callback {
+	static GameFieldFrame gameFieldFrame;
+	static StartGame startGame = new StartGame();
+	
 	public static void main(String[] args) {
 		final Point INITIAL_LOCATION = new Point(300, 300);
 		setLook();
-		new GameFieldFrame(INITIAL_LOCATION, new Resourses());
+		gameFieldFrame = new GameFieldFrame(INITIAL_LOCATION, new Resourses(), startGame);
 	}
 	
 	private static void setLook() {
@@ -316,7 +321,10 @@ public class StartGame {
 			System.out.print(e);
 		}
 	}
-
+	
+	public void execute(Point location, Resourses res) {
+		gameFieldFrame = new GameFieldFrame(location, res, this);
+	}
 }
 
 
