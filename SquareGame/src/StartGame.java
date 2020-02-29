@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.*;
+import java.util.LinkedList;
+
 import javax.swing.*;
 
 final class Resourses {
@@ -96,14 +98,12 @@ final class Target extends JButton {
 
 final class Bullet extends JLabel {
 	Resourses imageResourses;
-	boolean exist = false;
 	int waitCounter = 0;
-	int edge = 0;
+	int edge = -2;
 	
 	Bullet(Resourses res) {
 		imageResourses = res;
 		setIcon(imageResourses.bulletImage);
-		exist = true;
 	}
 }
 
@@ -113,8 +113,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	Dimension FieldSize = new Dimension(350, 450);
 	Cannon cannon;
 	Target target;
-	Bullet[] bullets;
-	int bulletNumber = 0;
+	LinkedList<Bullet> bullets;
 	boolean bulletCtrl = false;
 	Timer reloadTimer;
 	Timer movementTimer;
@@ -127,7 +126,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		imageResourses = res;
 		setLocation(location);
 		setSize(FieldSize);
-		bullets = new Bullet[6];
+		bullets = new LinkedList<Bullet>();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
@@ -191,30 +190,30 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			cannonAccelerator = 1;
 			keyPressedCounter = 0;
 			cannon.setState(CannonState.RELOAD);
-			bullets[bulletNumber] = new Bullet(imageResourses);
-			bullets[bulletNumber].setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
+			bullets.add(new Bullet(imageResourses));
+			bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
 			bulletCtrl = true;
-			add(bullets[bulletNumber]);
+			add(bullets.peekLast());
 			repaint();
 			reloadTimer.start();
 			break;
 		} else {
 			switch (ke.getExtendedKeyCode()) {
 			case 37:
-				if (bullets[bulletNumber].getX() > 0) {
-					bullets[bulletNumber].setLocation((bullets[bulletNumber].getX() - 2),
-							bullets[bulletNumber].getY());
+				if (bullets.peekLast().getX() > 0) {
+					bullets.peekLast().setLocation((bullets.peekLast().getX() - 2),
+							bullets.peekLast().getY());
 				} else {
-					bullets[bulletNumber].setLocation(0, bullets[bulletNumber].getY());
+					bullets.peekLast().setLocation(0, bullets.peekLast().getY());
 				}
 				break;
 			case 39:
-				if (bullets[bulletNumber].getX() < getWidth() - 17 - 64) {
-					bullets[bulletNumber].setLocation((bullets[bulletNumber].getX() + 2),
-							bullets[bulletNumber].getY());
+				if (bullets.peekLast().getX() < getWidth() - 17 - 64) {
+					bullets.peekLast().setLocation((bullets.peekLast().getX() + 2),
+							bullets.peekLast().getY());
 				} else {
-					bullets[bulletNumber].setLocation(getWidth() - 17 - 64,
-							bullets[bulletNumber].getY());
+					bullets.peekLast().setLocation(getWidth() - 17 - 64,
+							bullets.peekLast().getY());
 				}
 				break;
 			}
@@ -228,10 +227,6 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
 			bulletCtrl = false;
-			if (bulletNumber == 5)
-				bulletNumber = 0;
-			else
-				bulletNumber++;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		}
@@ -251,27 +246,31 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				}
 			}
 			
-			for (Bullet bullet : bullets) {
-				if (bullet != null && bullet.exist) {
-					if (++bullet.waitCounter >= 4 && bullet.getY() > 1) {
+			if (bullets.size() > 0) {
+				boolean removeBullet = false;
+				for (Bullet bullet : bullets) {
+					if (++bullet.waitCounter >= 20 && bullet.getY() > 1) {
 						bullet.waitCounter = 0;
 						bullet.setLocation(bullet.getX(), bullet.getY() - 1);
 						repaint();
 						if (bullet.getY() <= 32 && bullet.edge <= 32) {
-							if (bullet.getX() + 32 + bullet.edge > target.getX() &&
-									bullet.getX() + 32 - bullet.edge < target.getX() + 64) {
+							bullet.edge += 2;
+							if (bullet.getX() + 32 + bullet.edge > target.getX()
+									&& bullet.getX() + 32 - bullet.edge < target.getX() + 64) {
 								remove(bullet);
-								bullet.exist = false;
+								removeBullet = true;
 								target.getDamage();
 								repaint();
 							}
-							bullet.edge += 2;
 						}
 					} else if (bullet.getY() <= 1) {
 						remove(bullet);
-						bullet.exist = false;
+						removeBullet = true;
 						repaint();
 					}
+				}
+				if (removeBullet) {
+					bullets.remove();
 				}
 			}
 		}
