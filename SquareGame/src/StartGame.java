@@ -158,45 +158,48 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	}
 	
 	public void keyPressed(KeyEvent ke) {
-		if (!bulletCtrl)
-		switch (ke.getExtendedKeyCode()) {
-		case 37:
-			cannon.setState(CannonState.TO_LEFT);
-			if (cannon.getX() > 0) {
-				cannon.setLocation((cannon.getX() - 1 * cannonAccelerator), cannon.getY());
-				keyPressedCounter++;
-				if (keyPressedCounter == 25) 
-					cannonAccelerator = 2;
-				else if (keyPressedCounter == 70) 
-					cannonAccelerator = 4;
-			} else {
-				cannon.setLocation(0, cannon.getY());
+		if (!bulletCtrl) {
+			switch (ke.getExtendedKeyCode()) {
+			case 37:
+				cannon.setState(CannonState.TO_LEFT);
+				if (cannon.getX() > 0) {
+					cannon.setLocation((cannon.getX() - 1 * cannonAccelerator), cannon.getY());
+					keyPressedCounter++;
+					if (keyPressedCounter == 25) {
+						cannonAccelerator = 2;
+					} else if (keyPressedCounter == 70) {
+						cannonAccelerator = 4;
+					}
+				} else {
+					cannon.setLocation(0, cannon.getY());
+				}
+				break;
+			case 39:
+				cannon.setState(CannonState.TO_RIGHT);
+				if (cannon.getX() < getWidth() - 17 - 64) {
+					cannon.setLocation((cannon.getX() + 1 * cannonAccelerator), cannon.getY());
+					keyPressedCounter++;
+					if (keyPressedCounter == 25) {
+						cannonAccelerator = 2;
+					} else if (keyPressedCounter == 70) {
+						cannonAccelerator = 4;
+					}
+				} else {
+					cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
+				}
+				break;
+			case 32:
+				cannonAccelerator = 1;
+				keyPressedCounter = 0;
+				cannon.setState(CannonState.RELOAD);
+				bullets.add(new Bullet(imageResourses));
+				bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
+				bulletCtrl = true;
+				add(bullets.peekLast());
+				repaint();
+				reloadTimer.start();
+				break;
 			}
-			break;
-		case 39:
-			cannon.setState(CannonState.TO_RIGHT);
-			if (cannon.getX() < getWidth() - 17 - 64) {
-				cannon.setLocation((cannon.getX() + 1 * cannonAccelerator), cannon.getY());
-				keyPressedCounter++;
-				if (keyPressedCounter == 25) 
-					cannonAccelerator = 2;
-				else if (keyPressedCounter == 70) 
-					cannonAccelerator = 4;
-			} else {
-				cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
-			}
-			break;
-		case 32:
-			cannonAccelerator = 1;
-			keyPressedCounter = 0;
-			cannon.setState(CannonState.RELOAD);
-			bullets.add(new Bullet(imageResourses));
-			bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
-			bulletCtrl = true;
-			add(bullets.peekLast());
-			repaint();
-			reloadTimer.start();
-			break;
 		} else {
 			switch (ke.getExtendedKeyCode()) {
 			case 37:
@@ -234,22 +237,24 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= 10) {
 				target.waitCounter = 0;
 				if (target.toLeft) {
-					if (target.getX() > 0)
+					if (target.getX() > 0) {
 						target.setLocation(target.getX() - 1, target.getY());
-					else 
+					} else {
 						target.toLeft = false;
+					}
 				} else {
-					if (target.getX() + 64 < getWidth() - 17)
+					if (target.getX() + 64 < getWidth() - 17) {
 						target.setLocation(target.getX() + 1, target.getY());
-					else
+					} else {
 						target.toLeft = true;
+					}
 				}
 			}
 			
 			if (bullets.size() > 0) {
 				boolean removeBullet = false;
 				for (Bullet bullet : bullets) {
-					if (++bullet.waitCounter >= 20 && bullet.getY() > 1) {
+					if (++bullet.waitCounter >= 5 && bullet.getY() > 1) {
 						bullet.waitCounter = 0;
 						bullet.setLocation(bullet.getX(), bullet.getY() - 1);
 						repaint();
