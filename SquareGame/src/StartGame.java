@@ -177,55 +177,63 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	
 	public void keyPressed(KeyEvent ke) {
 		if (!bulletCtrl) {
-			switch (ke.getExtendedKeyCode()) {
-			case 37:
-				cannon.setState(CannonState.TO_LEFT);
-				if (cannon.getX() > 0) {
-					cannon.moving(CannonState.TO_LEFT);
-				} else {
-					cannon.setLocation(0, cannon.getY());
-				}
-				break;
-			case 39:
-				cannon.setState(CannonState.TO_RIGHT);
-				if (cannon.getX() < getWidth() - 17 - 64) {
-					cannon.moving(CannonState.TO_RIGHT);
-				} else {
-					cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
-				}
-				break;
-			case 32:
-				cannon.accelerator = 1;
-				keyPressedCounter = 0;
-				cannon.setState(CannonState.RELOAD);
-				bullets.add(new Bullet(imageResourses));
-				bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
-				bulletCtrl = true;
-				add(bullets.peekLast());
-				repaint();
-				reloadTimer.start();
-				break;
-			}
+			cannonControlButtons(ke);
 		} else {
-			switch (ke.getExtendedKeyCode()) {
-			case 37:
-				if (bullets.peekLast().getX() > 0) {
-					bullets.peekLast().setLocation((bullets.peekLast().getX() - 2),
-							bullets.peekLast().getY());
-				} else {
-					bullets.peekLast().setLocation(0, bullets.peekLast().getY());
-				}
-				break;
-			case 39:
-				if (bullets.peekLast().getX() < getWidth() - 17 - 64) {
-					bullets.peekLast().setLocation((bullets.peekLast().getX() + 2),
-							bullets.peekLast().getY());
-				} else {
-					bullets.peekLast().setLocation(getWidth() - 17 - 64,
-							bullets.peekLast().getY());
-				}
-				break;
+			bulletControlButtons(ke);
+		}
+	}
+	
+	private void cannonControlButtons(KeyEvent ke) {
+		switch (ke.getExtendedKeyCode()) {
+		case 37:
+			cannon.setState(CannonState.TO_LEFT);
+			if (cannon.getX() > 0) {
+				cannon.moving(CannonState.TO_LEFT);
+			} else {
+				cannon.setLocation(0, cannon.getY());
 			}
+			break;
+		case 39:
+			cannon.setState(CannonState.TO_RIGHT);
+			if (cannon.getX() < getWidth() - 17 - 64) {
+				cannon.moving(CannonState.TO_RIGHT);
+			} else {
+				cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
+			}
+			break;
+		case 32:
+			cannon.accelerator = 1;
+			keyPressedCounter = 0;
+			cannon.setState(CannonState.RELOAD);
+			bullets.add(new Bullet(imageResourses));
+			bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
+			bulletCtrl = true;
+			add(bullets.peekLast());
+			repaint();
+			reloadTimer.start();
+			break;
+		}
+	}
+	
+	private void bulletControlButtons(KeyEvent ke) {
+		switch (ke.getExtendedKeyCode()) {
+		case 37:
+			if (bullets.peekLast().getX() > 0) {
+				bullets.peekLast().setLocation((bullets.peekLast().getX() - 2),
+						bullets.peekLast().getY());
+			} else {
+				bullets.peekLast().setLocation(0, bullets.peekLast().getY());
+			}
+			break;
+		case 39:
+			if (bullets.peekLast().getX() < getWidth() - 17 - 64) {
+				bullets.peekLast().setLocation((bullets.peekLast().getX() + 2),
+						bullets.peekLast().getY());
+			} else {
+				bullets.peekLast().setLocation(getWidth() - 17 - 64,
+						bullets.peekLast().getY());
+			}
+			break;
 		}
 	}
 	
