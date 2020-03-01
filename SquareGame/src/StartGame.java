@@ -230,7 +230,6 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				cannon.setState(CannonState.DEFAULT);
 				int x = 0;
 				cannon.stay(x);
-				//cannon.setLocation(0, cannon.getY());
 			}
 			break;
 		case 39:
@@ -242,8 +241,6 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				cannon.setState(CannonState.DEFAULT);
 				int x = getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH;
 				cannon.stay(x);
-				//cannon.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
-				//		cannon.getY());
 			}
 			break;
 		case 32:
