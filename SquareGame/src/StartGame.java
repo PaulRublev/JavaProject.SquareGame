@@ -106,7 +106,7 @@ final class Target extends JButton {
 	}
 	
 	private void displayArmor() {
-		if (armor >= 0) {
+		if (!isRuined()) {
 			setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
 					armor * 2, armor * 2, Color.black));
 			setText(String.valueOf(armor));	
@@ -115,12 +115,8 @@ final class Target extends JButton {
 		}
 	}
 	
-	public boolean isDestroyed() {
-		if (getText().equalsIgnoreCase("@@@")) {
-			return true;
-		} else {
-			return false;
-		}
+	public boolean isRuined() {
+		return armor < 0;
 	}
 }
 
@@ -271,7 +267,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase("movement")) {
-			if (!target.isDestroyed() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
+			if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 				target.waitCounter = 0;
 				if (target.toLeft) {
 					if (target.getX() > 0) {
@@ -316,7 +312,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 					bullets.remove();
 				}
 			}
-		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isDestroyed()) {
+		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isRuined()) {
 			dispose();
 			completionListener.onLevelCompletion(getLocation(), imageRes);
 		}
