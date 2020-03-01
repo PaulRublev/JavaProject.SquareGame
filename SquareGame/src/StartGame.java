@@ -7,15 +7,16 @@ import java.util.LinkedList;
 
 import javax.swing.*;
 
-final class Resourses {
+final class Resources {
 	private final String iconPath = "icon/";
 	final ImageIcon defaultImage;
 	final ImageIcon toLeftImage;
 	final ImageIcon toRightImage;
 	final ImageIcon reloadImage;
 	final ImageIcon bulletImage;
+	final int SIDE_LENGTH = 64;
 	
-	Resourses() {
+	Resources() {
 		defaultImage = new ImageIcon(getClass().getResource(iconPath + "hold.png"));
 		toLeftImage = new ImageIcon(getClass().getResource(iconPath + "toLeft.png"));
 		toRightImage = new ImageIcon(getClass().getResource(iconPath + "toRight.png"));
@@ -32,13 +33,15 @@ enum CannonState {
 }
 
 final class Cannon extends JLabel {
+	final private int DOUBLE_ACCELERATION = 25;
+	final private int QUADRUPLE_ACCELERATION = 70;
 	private CannonState state;
-	private Resourses imageResourses;
+	private Resources imageRes;
 	int accelerator;
 	
-	Cannon(Resourses res) {
+	Cannon(Resources res) {
 		super();
-		imageResourses = res;
+		imageRes = res;
 		state = CannonState.DEFAULT;
 		setCannonImage();
 		accelerator = 1;
@@ -52,21 +55,21 @@ final class Cannon extends JLabel {
 	private void setCannonImage() {
 		switch (state) {
 		case DEFAULT:
-			setIcon(imageResourses.defaultImage);
+			setIcon(imageRes.defaultImage);
 			break;
 		case RELOAD:
-			setIcon(imageResourses.reloadImage);
+			setIcon(imageRes.reloadImage);
 			break;
 		case TO_LEFT:
-			setIcon(imageResourses.toLeftImage);
+			setIcon(imageRes.toLeftImage);
 			break;
 		case TO_RIGHT:
-			setIcon(imageResourses.toRightImage);
+			setIcon(imageRes.toRightImage);
 			break;
 		}
 	}
 	
-	public void moving(CannonState state) {
+	public void move(CannonState state) {
 		int directionSign = 0;
 		if (state.equals(CannonState.TO_LEFT)) {
 			directionSign = -1;
@@ -75,10 +78,10 @@ final class Cannon extends JLabel {
 		}
 		setLocation((getX() + directionSign * accelerator), getY());
 		GameFieldFrame.keyPressedCounter++;
-		if (GameFieldFrame.keyPressedCounter == 25) {
-			accelerator = 2;
-		} else if (GameFieldFrame.keyPressedCounter == 70) {
-			accelerator = 4;
+		if (GameFieldFrame.keyPressedCounter == DOUBLE_ACCELERATION) {
+			accelerator *= 2;
+		} else if (GameFieldFrame.keyPressedCounter == QUADRUPLE_ACCELERATION) {
+			accelerator *= 2;
 		}
 	}
 }
@@ -115,34 +118,38 @@ final class Target extends JButton {
 }
 
 final class Bullet extends JLabel {
-	Resourses imageResourses;
+	Resources imageRes;
 	int waitCounter = 0;
 	int edge = -2;
 	
-	Bullet(Resourses res) {
-		imageResourses = res;
-		setIcon(imageResourses.bulletImage);
+	Bullet(Resources res) {
+		imageRes = res;
+		setIcon(imageRes.bulletImage);
 	}
 }
 
 final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
-	Callback callback;
+	static int keyPressedCounter = 0;
 	final int RELOAD_TIME = 2;
 	final int INITIAL_ARMOR = 2;
+	final int RIGHTSIDE_CORRECTION = 17;
+	final int DOWNSIDE_CORRECTION = 40;
+	final int TARGET_SPEED_REDUCER = 10;
+	final int BULLET_SPEED_REDUCER = 5;
 	Dimension FieldSize = new Dimension(350, 450);
+	public boolean toLeft = false;
 	Cannon cannon;
 	Target target;
 	LinkedList<Bullet> bullets;
 	boolean bulletCtrl = false;
+	Callback callback;
 	Timer reloadTimer;
 	Timer movementTimer;
-	static int keyPressedCounter = 0;
-	public boolean toLeft = false;
-	Resourses imageResourses;
+	Resources imageRes;
 	
-	GameFieldFrame(Point location, Resourses res, StartGame startGame) {
+	GameFieldFrame(Point location, Resources res, StartGame startGame) {
 		callback = startGame;
-		imageResourses = res;
+		imageRes = res;
 		setLocation(location);
 		setSize(FieldSize);
 		bullets = new LinkedList<Bullet>();
@@ -157,13 +164,16 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		addKeyListener(this);
 		
 		target = new Target(INITIAL_ARMOR);
-		target.setBounds(getWidth() / 2 - 32, 0, 64, 32);
+		target.setBounds(getWidth() / 2 - imageRes.SIDE_LENGTH / 2, 0,
+				imageRes.SIDE_LENGTH, imageRes.SIDE_LENGTH / 2);
 		target.addActionListener(this);
 		add(target);
 		movementTimer.start();
 		
-		cannon = new Cannon(imageResourses);
-		cannon.setBounds(getWidth() / 2 - 32, getHeight() - 64 - 40, 64, 64);
+		cannon = new Cannon(imageRes);
+		cannon.setBounds(getWidth() / 2 - imageRes.SIDE_LENGTH / 2, 
+				getHeight() - imageRes.SIDE_LENGTH - DOWNSIDE_CORRECTION,
+				imageRes.SIDE_LENGTH, imageRes.SIDE_LENGTH);
 		add(cannon);
 		repaint();
 	}
@@ -189,27 +199,30 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		case 37:
 			cannon.setState(CannonState.TO_LEFT);
 			if (cannon.getX() > 0) {
-				cannon.moving(CannonState.TO_LEFT);
+				cannon.move(CannonState.TO_LEFT);
 			} else {
 				cannon.setLocation(0, cannon.getY());
 			}
 			break;
 		case 39:
 			cannon.setState(CannonState.TO_RIGHT);
-			if (cannon.getX() < getWidth() - 17 - 64) {
-				cannon.moving(CannonState.TO_RIGHT);
+			if (cannon.getX() < getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH) {
+				cannon.move(CannonState.TO_RIGHT);
 			} else {
-				cannon.setLocation(getWidth() - 17 - 64, cannon.getY());
+				cannon.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
+						cannon.getY());
 			}
 			break;
 		case 32:
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
 			cannon.setState(CannonState.RELOAD);
-			bullets.add(new Bullet(imageResourses));
-			bullets.peekLast().setBounds(cannon.getX(), getHeight() - 64 - 105, 64, 64);
+			final Bullet bullet = new Bullet(imageRes);
+			bullet.setBounds(cannon.getX(), cannon.getY() - imageRes.SIDE_LENGTH,
+					imageRes.SIDE_LENGTH, imageRes.SIDE_LENGTH);
+			add(bullet);
+			bullets.add(bullet);
 			bulletCtrl = true;
-			add(bullets.peekLast());
 			repaint();
 			reloadTimer.start();
 			break;
@@ -217,22 +230,22 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	}
 	
 	private void bulletControlButtons(KeyEvent ke) {
+		final Bullet firstBullet = bullets.peekLast();
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			if (bullets.peekLast().getX() > 0) {
-				bullets.peekLast().setLocation((bullets.peekLast().getX() - 2),
-						bullets.peekLast().getY());
+			if (firstBullet.getX() > 0) {
+				firstBullet.setLocation((firstBullet.getX() - 2),
+						firstBullet.getY());
 			} else {
-				bullets.peekLast().setLocation(0, bullets.peekLast().getY());
+				firstBullet.setLocation(0, firstBullet.getY());
 			}
 			break;
 		case 39:
-			if (bullets.peekLast().getX() < getWidth() - 17 - 64) {
-				bullets.peekLast().setLocation((bullets.peekLast().getX() + 2),
-						bullets.peekLast().getY());
+			if (firstBullet.getX() < getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH) {
+				firstBullet.setLocation((firstBullet.getX() + 2), firstBullet.getY());
 			} else {
-				bullets.peekLast().setLocation(getWidth() - 17 - 64,
-						bullets.peekLast().getY());
+				firstBullet.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
+						firstBullet.getY());
 			}
 			break;
 		}
@@ -243,12 +256,13 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	}
 	
 	public void actionPerformed(ActionEvent ae) {
-		if (ae.getActionCommand().equalsIgnoreCase("reload")) {
+		final String actionEventName = ae.getActionCommand();
+		if (actionEventName.equalsIgnoreCase("reload")) {
 			bulletCtrl = false;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
-		} else if (ae.getActionCommand().equalsIgnoreCase("movement")) {
-			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= 10) {
+		} else if (actionEventName.equalsIgnoreCase("movement")) {
+			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 				target.waitCounter = 0;
 				if (target.toLeft) {
 					if (target.getX() > 0) {
@@ -257,7 +271,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 						target.toLeft = false;
 					}
 				} else {
-					if (target.getX() + 64 < getWidth() - 17) {
+					if (target.getX() + imageRes.SIDE_LENGTH < getWidth() - RIGHTSIDE_CORRECTION) {
 						target.setLocation(target.getX() + 1, target.getY());
 					} else {
 						target.toLeft = true;
@@ -268,14 +282,15 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			if (bullets.size() > 0) {
 				boolean removeBullet = false;
 				for (Bullet bullet : bullets) {
-					if (++bullet.waitCounter >= 5 && bullet.getY() > 1) {
+					if (++bullet.waitCounter >= BULLET_SPEED_REDUCER && bullet.getY() > 1) {
 						bullet.waitCounter = 0;
 						bullet.setLocation(bullet.getX(), bullet.getY() - 1);
 						repaint();
-						if (bullet.getY() <= 32 && bullet.edge <= 32) {
+						if (bullet.getY() <= imageRes.SIDE_LENGTH / 2
+								&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
 							bullet.edge += 2;
-							if (bullet.getX() + 32 + bullet.edge > target.getX()
-									&& bullet.getX() + 32 - bullet.edge < target.getX() + 64) {
+							if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
+									&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + 64) {
 								remove(bullet);
 								removeBullet = true;
 								target.getDamage();
@@ -292,15 +307,15 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 					bullets.remove();
 				}
 			}
-		} else if (ae.getActionCommand().equalsIgnoreCase("@@@")) {
+		} else if (actionEventName.equalsIgnoreCase("@@@")) {
 			dispose();
-			callback.execute(getLocation(), imageResourses);
+			callback.execute(getLocation(), imageRes);
 		}
 	}
 }
 
 interface Callback {
-	void execute(Point location, Resourses res);
+	void execute(Point location, Resources res);
 }
 
 public class StartGame implements Callback {
@@ -310,7 +325,7 @@ public class StartGame implements Callback {
 	public static void main(String[] args) {
 		final Point INITIAL_LOCATION = new Point(300, 300);
 		setLook();
-		gameFieldFrame = new GameFieldFrame(INITIAL_LOCATION, new Resourses(), startGame);
+		gameFieldFrame = new GameFieldFrame(INITIAL_LOCATION, new Resources(), startGame);
 	}
 	
 	private static void setLook() {
@@ -322,7 +337,7 @@ public class StartGame implements Callback {
 		}
 	}
 	
-	public void execute(Point location, Resourses res) {
+	public void execute(Point location, Resources res) {
 		gameFieldFrame = new GameFieldFrame(location, res, this);
 	}
 }
