@@ -86,7 +86,7 @@ final class Cannon extends JLabel {
 		}
 	}
 	
-	public void move(CannonState state, int keyPressedCounter) {
+	public void move(int keyPressedCounter) {
 		int directionSign = 0;
 		if (state.equals(CannonState.TO_LEFT)) {
 			directionSign = -1;
@@ -99,6 +99,10 @@ final class Cannon extends JLabel {
 		} else if (keyPressedCounter == QUADRUPLE_ACCELERATION) {
 			accelerator *= 2;
 		}
+	}
+	
+	public void stay(int x) {
+		setLocation(x, getY());
 	}
 }
 
@@ -123,13 +127,15 @@ final class Target extends JButton {
 	}
 	
 	private void displayArmor() {
+		String targetCondition;
 		if (!isRuined()) {
 			setBorder(BorderFactory.createMatteBorder(0, armor * 2, 
 					armor * 2, armor * 2, Color.black));
-			setText(String.valueOf(armor));	
+			targetCondition = String.valueOf(armor);	
 		} else {
-			setText(StringConstants.RUINED.toString());
+			targetCondition = StringConstants.RUINED.toString();
 		}
+		setText(targetCondition);
 	}
 	
 	public boolean isRuined() {
@@ -216,22 +222,28 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	private void cannonControlButtons(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			cannon.setState(CannonState.TO_LEFT);
 			if (cannon.getX() > 0) {
 				keyPressedCounter++;
-				cannon.move(CannonState.TO_LEFT, keyPressedCounter);
+				cannon.setState(CannonState.TO_LEFT);
+				cannon.move(keyPressedCounter);
 			} else {
-				cannon.setLocation(0, cannon.getY());
+				cannon.setState(CannonState.DEFAULT);
+				int x = 0;
+				cannon.stay(x);
+				//cannon.setLocation(0, cannon.getY());
 			}
 			break;
 		case 39:
-			cannon.setState(CannonState.TO_RIGHT);
 			if (cannon.getX() < getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH) {
 				keyPressedCounter++;
-				cannon.move(CannonState.TO_RIGHT, keyPressedCounter);
+				cannon.setState(CannonState.TO_RIGHT);
+				cannon.move(keyPressedCounter);
 			} else {
-				cannon.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
-						cannon.getY());
+				cannon.setState(CannonState.DEFAULT);
+				int x = getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH;
+				cannon.stay(x);
+				//cannon.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
+				//		cannon.getY());
 			}
 			break;
 		case 32:
