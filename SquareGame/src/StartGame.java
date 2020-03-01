@@ -322,7 +322,8 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 						&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
 					bullet.edge += 2;
 					if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
-							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + imageRes.SIDE_LENGTH) {
+							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < 
+							target.getX() + imageRes.SIDE_LENGTH) {
 						remove(bullet);
 						removeBullet = true;
 						target.getDamage();
