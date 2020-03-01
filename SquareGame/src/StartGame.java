@@ -114,6 +114,14 @@ final class Target extends JButton {
 			setText("@@@");
 		}
 	}
+	
+	public boolean isDestroyed() {
+		if (getText().equalsIgnoreCase("@@@")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 final class Bullet extends JLabel {
@@ -263,7 +271,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase("movement")) {
-			if (!target.getText().equalsIgnoreCase("@@@") && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
+			if (!target.isDestroyed() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 				target.waitCounter = 0;
 				if (target.toLeft) {
 					if (target.getX() > 0) {
@@ -291,7 +299,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 								&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
 							bullet.edge += 2;
 							if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
-									&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + 64) {
+									&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + imageRes.SIDE_LENGTH) {
 								remove(bullet);
 								removeBullet = true;
 								target.getDamage();
@@ -308,7 +316,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 					bullets.remove();
 				}
 			}
-		} else if (actionEventName.equalsIgnoreCase("@@@")) {
+		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isDestroyed()) {
 			dispose();
 			callback.execute(getLocation(), imageRes);
 		}
