@@ -142,7 +142,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	public boolean toLeft = false;
 	Cannon cannon;
 	Target target;
-	LinkedList<Bullet> bullets;
+	LinkedList<Bullet> bullets = new LinkedList<Bullet>();
 	boolean bulletCtrl = false;
 	LevelCompletionable completionListener;
 	Timer reloadTimer;
@@ -155,7 +155,6 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		imageRes = res;
 		setLocation(location);
 		setSize(FieldSize);
-		bullets = new LinkedList<Bullet>();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
@@ -313,24 +312,26 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				}
 			}
 		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isRuined()) {
+			StartGame.initialLocation = getLocation();
 			dispose();
-			completionListener.onLevelCompletion(getLocation(), imageRes);
+			completionListener.onLevelCompletion();
 		}
 	}
 }
 
 interface LevelCompletionable {
-	void onLevelCompletion(Point location, Resources res);
+	void onLevelCompletion();
 }
 
 public class StartGame implements LevelCompletionable {
-	static GameFieldFrame gameFieldFrame;
-	static StartGame startGame = new StartGame();
+	public static Point initialLocation = new Point(300, 300);
+	private static GameFieldFrame gameFieldFrame;
+	private static StartGame startGame = new StartGame();
+	private static Resources res = new Resources();
 	
 	public static void main(String[] args) {
-		final Point INITIAL_LOCATION = new Point(300, 300);
 		setLook();
-		gameFieldFrame = new GameFieldFrame(INITIAL_LOCATION, new Resources(), startGame);
+		gameFieldFrame = new GameFieldFrame(initialLocation, res, startGame);
 	}
 	
 	private static void setLook() {
@@ -342,8 +343,8 @@ public class StartGame implements LevelCompletionable {
 		}
 	}
 	
-	public void onLevelCompletion(Point location, Resources res) {
-		gameFieldFrame = new GameFieldFrame(location, res, this);
+	public void onLevelCompletion() {
+		gameFieldFrame = new GameFieldFrame(initialLocation, res, this);
 	}
 }
 
