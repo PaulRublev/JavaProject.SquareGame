@@ -8,3 +8,5 @@
 /CannonState.class
 /Callback.class
 /Resources.class
+/GameCompletionable.class
+/LevelCompletionable.class

@@ -148,14 +148,14 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	Target target;
 	LinkedList<Bullet> bullets;
 	boolean bulletCtrl = false;
-	Callback callback;
+	LevelCompletionable completionListener;
 	Timer reloadTimer;
 	Timer movementTimer;
 	Resources imageRes;
 	private int keyPressedCounter = 0;
 	
-	GameFieldFrame(Point location, Resources res, StartGame startGame) {
-		callback = startGame;
+	GameFieldFrame(Point location, Resources res, LevelCompletionable completionListener) {
+		this.completionListener = completionListener;
 		imageRes = res;
 		setLocation(location);
 		setSize(FieldSize);
@@ -318,16 +318,16 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			}
 		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isDestroyed()) {
 			dispose();
-			callback.execute(getLocation(), imageRes);
+			completionListener.onLevelCompletion(getLocation(), imageRes);
 		}
 	}
 }
 
-interface Callback {
-	void execute(Point location, Resources res);
+interface LevelCompletionable {
+	void onLevelCompletion(Point location, Resources res);
 }
 
-public class StartGame implements Callback {
+public class StartGame implements LevelCompletionable {
 	static GameFieldFrame gameFieldFrame;
 	static StartGame startGame = new StartGame();
 	
@@ -346,7 +346,7 @@ public class StartGame implements Callback {
 		}
 	}
 	
-	public void execute(Point location, Resources res) {
+	public void onLevelCompletion(Point location, Resources res) {
 		gameFieldFrame = new GameFieldFrame(location, res, this);
 	}
 }
