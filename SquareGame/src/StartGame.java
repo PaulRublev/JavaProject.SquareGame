@@ -312,20 +312,18 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				}
 			}
 		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isRuined()) {
-			StartGame.initialLocation = getLocation();
-			dispose();
-			completionListener.onLevelCompletion();
+			completionListener.onLevelCompletion(this);
 		}
 	}
 }
 
 interface LevelCompletionable {
-	void onLevelCompletion();
+	void onLevelCompletion(JFrame frame);
 }
 
 public class StartGame implements LevelCompletionable {
-	public static Point initialLocation = new Point(300, 300);
-	private static GameFieldFrame gameFieldFrame;
+	private static Point initialLocation = new Point(300, 300);
+	private static JFrame gameFieldFrame;
 	private static StartGame startGame = new StartGame();
 	private static Resources res = new Resources();
 	
@@ -343,7 +341,10 @@ public class StartGame implements LevelCompletionable {
 		}
 	}
 	
-	public void onLevelCompletion() {
+	public void onLevelCompletion(JFrame frame) {
+		gameFieldFrame = frame;
+		initialLocation = gameFieldFrame.getLocation();
+		gameFieldFrame.dispose();
 		gameFieldFrame = new GameFieldFrame(initialLocation, res, this);
 	}
 }
