@@ -32,6 +32,23 @@ enum CannonState {
 	TO_RIGHT;
 }
 
+enum StringConstants {
+	RUINED("@@@"),
+	RELOAD("reload"),
+	MOVEMENT("movement");
+	
+	private String value;
+	
+	private StringConstants(String value) {
+		this.value = value;
+	}
+	
+	@Override
+	public String toString() {
+		return this.value;
+	}
+}
+
 final class Cannon extends JLabel {
 	final private int DOUBLE_ACCELERATION = 25;
 	final private int QUADRUPLE_ACCELERATION = 70;
@@ -111,7 +128,7 @@ final class Target extends JButton {
 					armor * 2, armor * 2, Color.black));
 			setText(String.valueOf(armor));	
 		} else {
-			setText("@@@");
+			setText(StringConstants.RUINED.toString());
 		}
 	}
 	
@@ -261,58 +278,65 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	
 	public void actionPerformed(ActionEvent ae) {
 		final String actionEventName = ae.getActionCommand();
-		if (actionEventName.equalsIgnoreCase("reload")) {
+		if (actionEventName.equalsIgnoreCase(StringConstants.RELOAD.toString())) {
 			bulletCtrl = false;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
-		} else if (actionEventName.equalsIgnoreCase("movement")) {
-			if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
-				target.waitCounter = 0;
-				if (target.toLeft) {
-					if (target.getX() > 0) {
-						target.setLocation(target.getX() - 1, target.getY());
-					} else {
-						target.toLeft = false;
-					}
+		} else if (actionEventName.equalsIgnoreCase(StringConstants.MOVEMENT.toString())) {
+			targetMove();
+			if (bullets.size() > 0) {
+				bulletMove();
+			}
+		} else if (actionEventName.equalsIgnoreCase(StringConstants.RUINED.toString()) && target.isRuined()) {
+			completionListener.onLevelCompletion(this);
+		}
+	}
+	
+	private void targetMove() {
+		if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
+			target.waitCounter = 0;
+			if (target.toLeft) {
+				if (target.getX() > 0) {
+					target.setLocation(target.getX() - 1, target.getY());
 				} else {
-					if (target.getX() + imageRes.SIDE_LENGTH < getWidth() - RIGHTSIDE_CORRECTION) {
-						target.setLocation(target.getX() + 1, target.getY());
-					} else {
-						target.toLeft = true;
-					}
+					target.toLeft = false;
+				}
+			} else {
+				if (target.getX() + imageRes.SIDE_LENGTH < getWidth() - RIGHTSIDE_CORRECTION) {
+					target.setLocation(target.getX() + 1, target.getY());
+				} else {
+					target.toLeft = true;
 				}
 			}
-			
-			if (bullets.size() > 0) {
-				boolean removeBullet = false;
-				for (Bullet bullet : bullets) {
-					if (++bullet.waitCounter >= BULLET_SPEED_REDUCER && bullet.getY() > 1) {
-						bullet.waitCounter = 0;
-						bullet.setLocation(bullet.getX(), bullet.getY() - 1);
-						repaint();
-						if (bullet.getY() <= imageRes.SIDE_LENGTH / 2
-								&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
-							bullet.edge += 2;
-							if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
-									&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + imageRes.SIDE_LENGTH) {
-								remove(bullet);
-								removeBullet = true;
-								target.getDamage();
-								repaint();
-							}
-						}
-					} else if (bullet.getY() <= 1) {
+		}
+	}
+	
+	private void bulletMove() {
+		boolean removeBullet = false;
+		for (Bullet bullet : bullets) {
+			if (++bullet.waitCounter >= BULLET_SPEED_REDUCER && bullet.getY() > 1) {
+				bullet.waitCounter = 0;
+				bullet.setLocation(bullet.getX(), bullet.getY() - 1);
+				repaint();
+				if (bullet.getY() <= imageRes.SIDE_LENGTH / 2
+						&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
+					bullet.edge += 2;
+					if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
+							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < target.getX() + imageRes.SIDE_LENGTH) {
 						remove(bullet);
 						removeBullet = true;
+						target.getDamage();
 						repaint();
 					}
 				}
-				if (removeBullet) {
-					bullets.remove();
-				}
+			} else if (bullet.getY() <= 1) {
+				remove(bullet);
+				removeBullet = true;
+				repaint();
 			}
-		} else if (actionEventName.equalsIgnoreCase("@@@") && target.isRuined()) {
-			completionListener.onLevelCompletion(this);
+		}
+		if (removeBullet) {
+			bullets.remove();
 		}
 	}
 }
