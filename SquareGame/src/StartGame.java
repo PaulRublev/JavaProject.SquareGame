@@ -109,7 +109,8 @@ final class Cannon extends JLabel {
 final class Target extends JButton {
 	int waitCounter = 0;
 	private int armor;
-	boolean toLeft = false;
+	boolean toLeft = true;
+	int direction;
 	
 	Target(int armor) {
 		super();
@@ -140,6 +141,19 @@ final class Target extends JButton {
 	
 	public boolean isRuined() {
 		return armor < 0;
+	}
+	
+	public void move() {
+		if (toLeft) {
+			direction = -1;
+		} else {
+			direction = 1;
+		}
+		setLocation(getX() + 1 * direction, getY());
+	}
+	
+	public boolean inFrame(int frameWidth) {
+		return getX() > 0 && getX() < frameWidth;
 	}
 }
 
@@ -304,18 +318,10 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	private void targetMove() {
 		if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 			target.waitCounter = 0;
-			if (target.toLeft) {
-				if (target.getX() > 0) {
-					target.setLocation(target.getX() - 1, target.getY());
-				} else {
-					target.toLeft = false;
-				}
-			} else {
-				if (target.getX() + imageRes.SIDE_LENGTH < getWidth() - RIGHTSIDE_CORRECTION) {
-					target.setLocation(target.getX() + 1, target.getY());
-				} else {
-					target.toLeft = true;
-				}
+			int frameWidth = getWidth() - imageRes.SIDE_LENGTH - RIGHTSIDE_CORRECTION;
+			target.move();
+			if (!target.inFrame(frameWidth)) {
+				target.toLeft = !target.toLeft;
 			}
 		}
 	}
