@@ -110,7 +110,7 @@ final class Target extends JButton {
 	int waitCounter = 0;
 	private int armor;
 	boolean toLeft = true;
-	int direction;
+	int directionSign;
 	
 	Target(int armor) {
 		super();
@@ -145,15 +145,11 @@ final class Target extends JButton {
 	
 	public void move() {
 		if (toLeft) {
-			direction = -1;
+			directionSign = -1;
 		} else {
-			direction = 1;
+			directionSign = 1;
 		}
-		setLocation(getX() + 1 * direction, getY());
-	}
-	
-	public boolean inFrame(int frameWidth) {
-		return getX() > 0 && getX() < frameWidth;
+		setLocation(getX() + 1 * directionSign, getY());
 	}
 }
 
@@ -165,6 +161,10 @@ final class Bullet extends JLabel {
 	Bullet(Resources res) {
 		imageRes = res;
 		setIcon(imageRes.bulletImage);
+	}
+	
+	public void move(int directionSign) {
+		setLocation((getX() + 2 * directionSign), getY());
 	}
 }
 
@@ -186,6 +186,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	Timer movementTimer;
 	Resources imageRes;
 	private int keyPressedCounter = 0;
+	private int frameWidth;
 	
 	GameFieldFrame(Point location, Resources res, LevelCompletionable completionListener) {
 		this.completionListener = completionListener;
@@ -201,6 +202,8 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		movementTimer = new Timer(1, this);
 		movementTimer.setActionCommand("movement");
 		addKeyListener(this);
+		frameWidth = getWidth() - imageRes.SIDE_LENGTH - RIGHTSIDE_CORRECTION;
+
 		
 		target = new Target(INITIAL_ARMOR);
 		target.setBounds(getWidth() / 2 - imageRes.SIDE_LENGTH / 2, 0,
@@ -236,25 +239,27 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	private void cannonControlButtons(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			if (cannon.getX() > 0) {
+			if (inThisFrame(cannon)) {
 				keyPressedCounter++;
 				cannon.setState(CannonState.TO_LEFT);
 				cannon.move(keyPressedCounter);
-			} else {
-				cannon.setState(CannonState.DEFAULT);
-				int x = 0;
-				cannon.stay(x);
+				if (!inThisFrame(cannon)) {
+					cannon.setState(CannonState.DEFAULT);
+					int x = 0;
+					cannon.stay(x);
+				}
 			}
 			break;
 		case 39:
-			if (cannon.getX() < getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH) {
+			if (inThisFrame(cannon)) {
 				keyPressedCounter++;
 				cannon.setState(CannonState.TO_RIGHT);
 				cannon.move(keyPressedCounter);
-			} else {
-				cannon.setState(CannonState.DEFAULT);
-				int x = getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH;
-				cannon.stay(x);
+				if (!inThisFrame(cannon)) {
+					cannon.setState(CannonState.DEFAULT);
+					int x = frameWidth;
+					cannon.stay(x);
+				}
 			}
 			break;
 		case 32:
@@ -275,23 +280,23 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	
 	private void bulletControlButtons(KeyEvent ke) {
 		final Bullet firstBullet = bullets.peekLast();
+		int directionSign = 0;
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
-			if (firstBullet.getX() > 0) {
-				firstBullet.setLocation((firstBullet.getX() - 2),
-						firstBullet.getY());
-			} else {
-				firstBullet.setLocation(0, firstBullet.getY());
+			if (inThisFrame(firstBullet)) {
+				directionSign = -1;
 			}
 			break;
 		case 39:
-			if (firstBullet.getX() < getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH) {
-				firstBullet.setLocation((firstBullet.getX() + 2), firstBullet.getY());
-			} else {
-				firstBullet.setLocation(getWidth() - RIGHTSIDE_CORRECTION - imageRes.SIDE_LENGTH,
-						firstBullet.getY());
+			if (inThisFrame(firstBullet)) {
+				directionSign = 1;
 			}
 			break;
+		}
+		firstBullet.move(directionSign);
+		if (!inThisFrame(firstBullet)) {
+			directionSign *= -1;
+			firstBullet.move(directionSign);
 		}
 	}
 	
@@ -318,12 +323,15 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 	private void targetMove() {
 		if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 			target.waitCounter = 0;
-			int frameWidth = getWidth() - imageRes.SIDE_LENGTH - RIGHTSIDE_CORRECTION;
 			target.move();
-			if (!target.inFrame(frameWidth)) {
+			if (!inThisFrame(target)) {
 				target.toLeft = !target.toLeft;
 			}
 		}
+	}
+	
+	boolean inThisFrame(JComponent component) {
+		return component.getX() >= 0 && component.getX() <= frameWidth;
 	}
 	
 	private void bulletMove() {
