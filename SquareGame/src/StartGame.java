@@ -245,8 +245,8 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				cannon.move(keyPressedCounter);
 				if (!inThisFrame(cannon)) {
 					cannon.setState(CannonState.DEFAULT);
-					int x = 0;
-					cannon.stay(x);
+					int maxLeftX = 0;
+					cannon.stay(maxLeftX);
 				}
 			}
 			break;
@@ -257,8 +257,8 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				cannon.move(keyPressedCounter);
 				if (!inThisFrame(cannon)) {
 					cannon.setState(CannonState.DEFAULT);
-					int x = frameWidth;
-					cannon.stay(x);
+					int maxRightX = frameWidth;
+					cannon.stay(maxRightX);
 				}
 			}
 			break;
