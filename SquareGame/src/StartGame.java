@@ -50,8 +50,8 @@ enum StringConstants {
 }
 
 final class Cannon extends JLabel {
-	final private int DOUBLE_ACCELERATION = 25;
-	final private int QUADRUPLE_ACCELERATION = 70;
+	private final int DOUBLE_ACCELERATION = 25;
+	private final int QUADRUPLE_ACCELERATION = 70;
 	private CannonState state;
 	private Resources imageRes;
 	int accelerator;
@@ -110,7 +110,7 @@ final class Target extends JButton {
 	int waitCounter = 0;
 	private int armor;
 	boolean toLeft = true;
-	int directionSign;
+	private int directionSign;
 	
 	Target(int armor) {
 		super();
@@ -154,9 +154,10 @@ final class Target extends JButton {
 }
 
 final class Bullet extends JLabel {
-	Resources imageRes;
+	private Resources imageRes;
 	int waitCounter = 0;
 	int distanceToEdge = 0;
+	boolean toRemove = false;
 	
 	Bullet(Resources res) {
 		imageRes = res;
@@ -169,22 +170,21 @@ final class Bullet extends JLabel {
 }
 
 final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
-	final int RELOAD_TIME = 2;
-	final int INITIAL_ARMOR = 2;
-	final int RIGHTSIDE_CORRECTION = 17;
-	final int DOWNSIDE_CORRECTION = 40;
-	final int TARGET_SPEED_REDUCER = 10;
-	final int BULLET_SPEED_REDUCER = 5;
-	Dimension FieldSize = new Dimension(350, 450);
-	public boolean toLeft = false;
-	Cannon cannon;
-	Target target;
-	LinkedList<Bullet> bullets = new LinkedList<Bullet>();
-	boolean bulletCtrl = false;
-	LevelCompletionable completionListener;
-	Timer reloadTimer;
-	Timer movementTimer;
-	Resources imageRes;
+	private final int RELOAD_TIME = 2;
+	private final int INITIAL_ARMOR = 2;
+	private final int RIGHTSIDE_CORRECTION = 17;
+	private final int DOWNSIDE_CORRECTION = 40;
+	private final int TARGET_SPEED_REDUCER = 10;
+	private final int BULLET_SPEED_REDUCER = 5;
+	private final Dimension fieldSize = new Dimension(350, 450);
+	private Cannon cannon;
+	private Target target;
+	private LinkedList<Bullet> bullets = new LinkedList<Bullet>();
+	private boolean bulletCtrl = false;
+	private LevelCompletionable completionListener;
+	private Timer reloadTimer;
+	private Timer movementTimer;
+	private Resources imageRes;
 	private int keyPressedCounter = 0;
 	private int frameWidth;
 	
@@ -192,7 +192,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		this.completionListener = completionListener;
 		imageRes = res;
 		setLocation(location);
-		setSize(FieldSize);
+		setSize(fieldSize);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		setResizable(false);
@@ -311,16 +311,16 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase(StringConstants.MOVEMENT.toString())) {
-			targetMove();
+			moveTarget();
 			if (bullets.size() > 0) {
-				bulletMove();
+				moveBullet();
 			}
 		} else if (actionEventName.equalsIgnoreCase(StringConstants.RUINED.toString()) && target.isRuined()) {
 			completionListener.onLevelCompletion(this);
 		}
 	}
 	
-	private void targetMove() {
+	private void moveTarget() {
 		if (!target.isRuined() && ++target.waitCounter >= TARGET_SPEED_REDUCER) {
 			target.waitCounter = 0;
 			target.move();
@@ -334,7 +334,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		return component.getX() >= 0 && component.getX() <= frameWidth;
 	}
 	
-	private void bulletMove() {
+	private void moveBullet() {
 		boolean removeBullet = false;
 		for (Bullet bullet : bullets) {
 			if (++bullet.waitCounter >= BULLET_SPEED_REDUCER && bullet.getY() > 1) {
@@ -347,6 +347,7 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.distanceToEdge < 
 							target.getX() + imageRes.SIDE_LENGTH) {
 						remove(bullet);
+						bullet.toRemove = true;
 						removeBullet = true;
 						target.getDamage();
 						repaint();
@@ -355,12 +356,17 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				}
 			} else if (bullet.getY() <= 1) {
 				remove(bullet);
+				bullet.toRemove = true;
 				removeBullet = true;
 				repaint();
 			}
 		}
 		if (removeBullet) {
-			bullets.remove();
+			for (int i = bullets.size() - 1; i >= 0; i--) {
+				if (bullets.get(i).toRemove) {
+					bullets.remove(i);
+				}
+			}
 		}
 	}
 }
@@ -372,8 +378,8 @@ interface LevelCompletionable {
 public class StartGame implements LevelCompletionable {
 	private static Point initialLocation = new Point(300, 300);
 	private static JFrame gameFieldFrame;
-	private static StartGame startGame = new StartGame();
-	private static Resources res = new Resources();
+	private final static StartGame startGame = new StartGame();
+	private final static Resources res = new Resources();
 	
 	public static void main(String[] args) {
 		setLook();
