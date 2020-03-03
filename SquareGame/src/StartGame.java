@@ -156,7 +156,7 @@ final class Target extends JButton {
 final class Bullet extends JLabel {
 	Resources imageRes;
 	int waitCounter = 0;
-	int edge = -2;
+	int distanceToEdge = 0;
 	
 	Bullet(Resources res) {
 		imageRes = res;
@@ -198,9 +198,9 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 		setResizable(false);
 		setVisible(true);
 		reloadTimer = new Timer(RELOAD_TIME * 1000, this);
-		reloadTimer.setActionCommand("reload");
+		reloadTimer.setActionCommand(StringConstants.RELOAD.toString());
 		movementTimer = new Timer(1, this);
-		movementTimer.setActionCommand("movement");
+		movementTimer.setActionCommand(StringConstants.MOVEMENT.toString());
 		addKeyListener(this);
 		frameWidth = getWidth() - imageRes.SIDE_LENGTH - RIGHTSIDE_CORRECTION;
 
@@ -342,16 +342,16 @@ final class GameFieldFrame extends JFrame implements KeyListener, ActionListener
 				bullet.setLocation(bullet.getX(), bullet.getY() - 1);
 				repaint();
 				if (bullet.getY() <= imageRes.SIDE_LENGTH / 2
-						&& bullet.edge <= imageRes.SIDE_LENGTH / 2) {
-					bullet.edge += 2;
-					if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.edge > target.getX()
-							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.edge < 
+						&& bullet.distanceToEdge <= imageRes.SIDE_LENGTH / 2) {
+					if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.distanceToEdge > target.getX()
+							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.distanceToEdge < 
 							target.getX() + imageRes.SIDE_LENGTH) {
 						remove(bullet);
 						removeBullet = true;
 						target.getDamage();
 						repaint();
 					}
+					bullet.distanceToEdge += 2;
 				}
 			} else if (bullet.getY() <= 1) {
 				remove(bullet);
