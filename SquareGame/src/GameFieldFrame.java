@@ -82,15 +82,11 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 		}
 	}
 	
-	public void keyPressed(KeyEvent ke) throws NullPointerException {
+	public void keyPressed(KeyEvent ke) {
 		if (cannonCtrl) {
 			cannonControlButtons(ke);
 		} else if (bulletCtrl) {
-			try {
-				bulletControlButtons(ke);
-			} catch (NullPointerException e) {
-				
-			}
+			bulletControlButtons(ke);
 		}
 	}
 	
