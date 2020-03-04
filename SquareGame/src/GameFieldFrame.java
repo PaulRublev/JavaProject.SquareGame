@@ -34,6 +34,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	private Target target;
 	private LinkedList<Bullet> bullets = new LinkedList<Bullet>();
 	private boolean bulletCtrl = false;
+	private boolean cannonCtrl = true;
 	private LevelCompletionable completionListener;
 	private Timer reloadTimer;
 	private Timer movementTimer;
@@ -74,7 +75,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		if (!bulletCtrl) {
+		if (cannonCtrl) {
 			cannon.setState(CannonState.DEFAULT);
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
@@ -82,9 +83,9 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyPressed(KeyEvent ke) throws NullPointerException {
-		if (!bulletCtrl) {
+		if (cannonCtrl) {
 			cannonControlButtons(ke);
-		} else {
+		} else if (bulletCtrl) {
 			try {
 				bulletControlButtons(ke);
 			} catch (NullPointerException e) {
@@ -122,6 +123,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 		case 32:
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
+			cannonCtrl = false;
 			cannon.setState(CannonState.RELOAD);
 			final Bullet bullet = new Bullet(imageRes);
 			bullet.setBounds(cannon.getX(), cannon.getY() - imageRes.SIDE_LENGTH,
@@ -165,6 +167,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 		final String actionEventName = ae.getActionCommand();
 		if (actionEventName.equalsIgnoreCase(StringConstants.RELOAD.toString())) {
 			bulletCtrl = false;
+			cannonCtrl = true;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase(StringConstants.MOVEMENT.toString())) {
@@ -222,6 +225,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 			for (int i = bullets.size() - 1; i >= 0; i--) {
 				if (bullets.get(i).toRemove) {
 					bullets.remove(i);
+					bulletCtrl = false;
 				}
 			}
 		}
