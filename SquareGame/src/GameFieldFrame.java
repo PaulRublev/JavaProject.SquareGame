@@ -22,6 +22,12 @@ enum StringConstants {
 	}
 }
 
+enum States {
+	BULLET_CONTROL,
+	CANNON_CONTROL,
+	WAITING;
+}
+
 public final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
 	private final int RELOAD_TIME = 3;
 	private final int INITIAL_ARMOR = 2;
@@ -33,8 +39,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	private Cannon cannon;
 	private Target target;
 	private LinkedList<Bullet> bullets = new LinkedList<Bullet>();
-	private boolean bulletCtrl = false;
-	private boolean cannonCtrl = true;
+	private States state = States.CANNON_CONTROL;
 	private LevelCompletionable completionListener;
 	private Timer reloadTimer;
 	private Timer movementTimer;
@@ -75,7 +80,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		if (cannonCtrl) {
+		if (state == States.CANNON_CONTROL) {
 			cannon.setState(CannonState.DEFAULT);
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
@@ -83,9 +88,9 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyPressed(KeyEvent ke) {
-		if (cannonCtrl) {
+		if (state == States.CANNON_CONTROL) {
 			cannonControlButtons(ke);
-		} else if (bulletCtrl) {
+		} else if (state == States.BULLET_CONTROL) {
 			bulletControlButtons(ke);
 		}
 	}
@@ -119,14 +124,13 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 		case 32:
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
-			cannonCtrl = false;
 			cannon.setState(CannonState.RELOAD);
 			final Bullet bullet = new Bullet(imageRes);
 			bullet.setBounds(cannon.getX(), cannon.getY() - imageRes.SIDE_LENGTH,
 					imageRes.SIDE_LENGTH, imageRes.SIDE_LENGTH);
 			add(bullet);
 			bullets.add(bullet);
-			bulletCtrl = true;
+			state = States.BULLET_CONTROL;
 			repaint();
 			reloadTimer.start();
 			break;
@@ -162,8 +166,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	public void actionPerformed(ActionEvent ae) {
 		final String actionEventName = ae.getActionCommand();
 		if (actionEventName.equalsIgnoreCase(StringConstants.RELOAD.toString())) {
-			bulletCtrl = false;
-			cannonCtrl = true;
+			state = States.CANNON_CONTROL;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase(StringConstants.MOVEMENT.toString())) {
@@ -221,7 +224,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 			for (int i = bullets.size() - 1; i >= 0; i--) {
 				if (bullets.get(i).toRemove) {
 					bullets.remove(i);
-					bulletCtrl = false;
+					state = States.WAITING;
 				}
 			}
 		}
