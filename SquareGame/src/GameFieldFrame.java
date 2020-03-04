@@ -22,10 +22,10 @@ enum StringConstants {
 	}
 }
 
-enum States {
-	BULLET_CONTROL,
-	CANNON_CONTROL,
-	WAITING;
+enum KeyboardFocus {
+	BULLET,
+	CANNON,
+	NOTHING;
 }
 
 public final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
@@ -39,7 +39,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	private Cannon cannon;
 	private Target target;
 	private LinkedList<Bullet> bullets = new LinkedList<Bullet>();
-	private States state = States.CANNON_CONTROL;
+	private KeyboardFocus focus = KeyboardFocus.CANNON;
 	private LevelCompletionable completionListener;
 	private Timer reloadTimer;
 	private Timer movementTimer;
@@ -80,7 +80,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyReleased(KeyEvent ke) {
-		if (state == States.CANNON_CONTROL) {
+		if (focus == KeyboardFocus.CANNON) {
 			cannon.setState(CannonState.DEFAULT);
 			cannon.accelerator = 1;
 			keyPressedCounter = 0;
@@ -88,9 +88,9 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	public void keyPressed(KeyEvent ke) {
-		if (state == States.CANNON_CONTROL) {
+		if (focus == KeyboardFocus.CANNON) {
 			cannonControlButtons(ke);
-		} else if (state == States.BULLET_CONTROL) {
+		} else if (focus == KeyboardFocus.BULLET) {
 			bulletControlButtons(ke);
 		}
 	}
@@ -130,7 +130,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 					imageRes.SIDE_LENGTH, imageRes.SIDE_LENGTH);
 			add(bullet);
 			bullets.add(bullet);
-			state = States.BULLET_CONTROL;
+			focus = KeyboardFocus.BULLET;
 			repaint();
 			reloadTimer.start();
 			break;
@@ -166,7 +166,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	public void actionPerformed(ActionEvent ae) {
 		final String actionEventName = ae.getActionCommand();
 		if (actionEventName.equalsIgnoreCase(StringConstants.RELOAD.toString())) {
-			state = States.CANNON_CONTROL;
+			focus = KeyboardFocus.CANNON;
 			cannon.setState(CannonState.DEFAULT);
 			reloadTimer.stop();
 		} else if (actionEventName.equalsIgnoreCase(StringConstants.MOVEMENT.toString())) {
@@ -224,7 +224,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 			for (int i = bullets.size() - 1; i >= 0; i--) {
 				if (bullets.get(i).toRemove) {
 					bullets.remove(i);
-					state = States.WAITING;
+					focus = KeyboardFocus.NOTHING;
 				}
 			}
 		}
