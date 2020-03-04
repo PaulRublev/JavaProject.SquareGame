@@ -2,6 +2,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.*;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -194,7 +195,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	}
 	
 	private void moveBullet() {
-		boolean removeBullet = false;
+		LinkedList<Bullet> toDeleteList = new LinkedList<Bullet>();
 		for (Bullet bullet : bullets) {
 			if (++bullet.waitCounter >= BULLET_SPEED_REDUCER && bullet.getY() > 1) {
 				bullet.waitCounter = 0;
@@ -206,8 +207,7 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.distanceToEdge < 
 							target.getX() + imageRes.SIDE_LENGTH) {
 						remove(bullet);
-						bullet.toRemove = true;
-						removeBullet = true;
+						toDeleteList.add(bullet);
 						target.getDamage();
 						repaint();
 					}
@@ -215,15 +215,15 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 				}
 			} else if (bullet.getY() <= 1) {
 				remove(bullet);
-				bullet.toRemove = true;
-				removeBullet = true;
+				toDeleteList.add(bullet);
 				repaint();
 			}
 		}
-		if (removeBullet) {
-			for (int i = bullets.size() - 1; i >= 0; i--) {
-				if (bullets.get(i).toRemove) {
-					bullets.remove(i);
+		if (!bullets.isEmpty()) {
+			if (!toDeleteList.isEmpty()) {
+				Bullet lastBullet = bullets.peekLast();
+				bullets.removeAll(toDeleteList);
+				if (bullets.isEmpty() || lastBullet != bullets.peekLast()) {
 					focus = KeyboardFocus.NOTHING;
 				}
 			}

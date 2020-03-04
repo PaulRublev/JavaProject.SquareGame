@@ -4,7 +4,6 @@ public final class Bullet extends JLabel {
 	private Resources imageRes;
 	int waitCounter = 0;
 	int distanceToEdge = 0;
-	boolean toRemove = false;
 	
 	Bullet(Resources res) {
 		imageRes = res;
