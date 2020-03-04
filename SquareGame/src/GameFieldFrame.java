@@ -23,7 +23,7 @@ enum StringConstants {
 }
 
 public final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
-	private final int RELOAD_TIME = 2;
+	private final int RELOAD_TIME = 3;
 	private final int INITIAL_ARMOR = 2;
 	private final int RIGHTSIDE_CORRECTION = 17;
 	private final int DOWNSIDE_CORRECTION = 40;
@@ -81,11 +81,15 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 		}
 	}
 	
-	public void keyPressed(KeyEvent ke) {
+	public void keyPressed(KeyEvent ke) throws NullPointerException {
 		if (!bulletCtrl) {
 			cannonControlButtons(ke);
 		} else {
-			bulletControlButtons(ke);
+			try {
+				bulletControlButtons(ke);
+			} catch (NullPointerException e) {
+				
+			}
 		}
 	}
 	
