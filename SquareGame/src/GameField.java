@@ -1,8 +1,6 @@
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.*;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.*;
 
@@ -29,7 +27,7 @@ enum KeyboardFocus {
 	NOTHING;
 }
 
-public final class GameFieldFrame extends JFrame implements KeyListener, ActionListener {
+public final class GameField extends JComponent implements KeyListener, ActionListener {
 	private final int RELOAD_TIME = 3;
 	private final int INITIAL_ARMOR = 2;
 	private final int RIGHTSIDE_CORRECTION = 17;
@@ -48,14 +46,13 @@ public final class GameFieldFrame extends JFrame implements KeyListener, ActionL
 	private int keyPressedCounter = 0;
 	private int frameWidth;
 	
-	GameFieldFrame(Point location, Resources res, LevelCompletionable completionListener) {
+	GameField(Resources res, LevelCompletionable completionListener) {
 		this.completionListener = completionListener;
 		imageRes = res;
-		setLocation(location);
+		setLocation(0, 0);
 		setSize(fieldSize);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
-		setResizable(false);
+		setFocusable(true);
 		setVisible(true);
 		reloadTimer = new Timer(RELOAD_TIME * 1000, this);
 		reloadTimer.setActionCommand(StringConstants.RELOAD.toString());

@@ -1,21 +1,13 @@
-
 import java.awt.Point;
 
 import javax.swing.*;
 
-interface LevelCompletionable {
-	void onLevelCompletion(JFrame frame);
-}
-
-public class StartGame implements LevelCompletionable {
+public class StartGame {
 	private static Point initialLocation = new Point(300, 300);
-	private static JFrame gameFieldFrame;
-	private final static StartGame startGame = new StartGame();
-	private final static Resources res = new Resources();
 	
 	public static void main(String[] args) {
 		setLook();
-		gameFieldFrame = new GameFieldFrame(initialLocation, res, startGame);
+		new RootFrame(initialLocation);
 	}
 	
 	private static void setLook() {
@@ -25,13 +17,6 @@ public class StartGame implements LevelCompletionable {
 		} catch (Exception e) {
 			System.out.print(e);
 		}
-	}
-	
-	public void onLevelCompletion(JFrame frame) {
-		gameFieldFrame = frame;
-		initialLocation = gameFieldFrame.getLocation();
-		gameFieldFrame.dispose();
-		gameFieldFrame = new GameFieldFrame(initialLocation, res, this);
 	}
 }
 
