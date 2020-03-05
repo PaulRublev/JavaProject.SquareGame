@@ -28,7 +28,7 @@ enum KeyboardFocus {
 }
 
 public final class GameField extends JComponent implements KeyListener, ActionListener {
-	private final int RELOAD_TIME = 3;
+	private final int RELOAD_TIME = 2;
 	private final int INITIAL_ARMOR = 2;
 	private final int RIGHTSIDE_CORRECTION = 17;
 	private final int DOWNSIDE_CORRECTION = 40;
@@ -87,13 +87,13 @@ public final class GameField extends JComponent implements KeyListener, ActionLi
 	
 	public void keyPressed(KeyEvent ke) {
 		if (focus == KeyboardFocus.CANNON) {
-			cannonControlButtons(ke);
+			cannonControlButtonsPressed(ke);
 		} else if (focus == KeyboardFocus.BULLET) {
-			bulletControlButtons(ke);
+			bulletControlButtonsPressed(ke);
 		}
 	}
 	
-	private void cannonControlButtons(KeyEvent ke) {
+	private void cannonControlButtonsPressed(KeyEvent ke) {
 		switch (ke.getExtendedKeyCode()) {
 		case 37:
 			if (inThisFrame(cannon)) {
@@ -135,7 +135,7 @@ public final class GameField extends JComponent implements KeyListener, ActionLi
 		}
 	}
 	
-	private void bulletControlButtons(KeyEvent ke) {
+	private void bulletControlButtonsPressed(KeyEvent ke) {
 		final Bullet firstBullet = bullets.peekLast();
 		int directionSign = 0;
 		switch (ke.getExtendedKeyCode()) {
@@ -220,7 +220,7 @@ public final class GameField extends JComponent implements KeyListener, ActionLi
 			if (!toDeleteList.isEmpty()) {
 				Bullet lastBullet = bullets.peekLast();
 				bullets.removeAll(toDeleteList);
-				if (bullets.isEmpty() || lastBullet != bullets.peekLast()) {
+				if ((bullets.isEmpty() || lastBullet != bullets.peekLast()) && focus == KeyboardFocus.BULLET) {
 					focus = KeyboardFocus.NOTHING;
 				}
 			}
