@@ -4,23 +4,6 @@ import java.util.LinkedList;
 
 import javax.swing.*;
 
-enum StringConstants {
-	RUINED("@@@"),
-	RELOAD("reload"),
-	MOVEMENT("movement");
-	
-	private String value;
-	
-	private StringConstants(String value) {
-		this.value = value;
-	}
-	
-	@Override
-	public String toString() {
-		return this.value;
-	}
-}
-
 enum KeyboardFocus {
 	BULLET,
 	CANNON,
@@ -203,22 +186,22 @@ public final class GameField extends JComponent implements KeyListener, ActionLi
 					if (bullet.getX() + imageRes.SIDE_LENGTH / 2 + bullet.distanceToEdge > target.getX()
 							&& bullet.getX() + imageRes.SIDE_LENGTH / 2 - bullet.distanceToEdge < 
 							target.getX() + imageRes.SIDE_LENGTH) {
-						remove(bullet);
 						toDeleteList.add(bullet);
 						target.getDamage();
-						repaint();
 					}
 					bullet.distanceToEdge += 2;
 				}
 			} else if (bullet.getY() <= 1) {
-				remove(bullet);
 				toDeleteList.add(bullet);
-				repaint();
 			}
 		}
 		if (!bullets.isEmpty()) {
 			if (!toDeleteList.isEmpty()) {
 				Bullet lastBullet = bullets.peekLast();
+				for (Bullet bullet : toDeleteList) {
+					remove(bullet);
+				}
+				repaint();
 				bullets.removeAll(toDeleteList);
 				if ((bullets.isEmpty() || lastBullet != bullets.peekLast()) && focus == KeyboardFocus.BULLET) {
 					focus = KeyboardFocus.NOTHING;
